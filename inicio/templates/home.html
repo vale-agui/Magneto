@@ -45,7 +45,7 @@
 <body class="min-h-screen bg-sky-50 font-sans">
     <!-- Encabezado simple con el logo -->
     <header class="flex items-center justify-between bg-white p-4 shadow">
-        <a href="{% url 'home' %}" class="text-2xl font-bold text-sky-600">Magneto</a>
+        <a href="{% url 'home' %}" class="text-2xl font-bold text-sky-600">ÉLAN AUTOMATE</a>
         <!-- Sección de autenticación -->
         {% if user.is_authenticated %}
             <div class="flex items-center space-x-4">
@@ -65,6 +65,11 @@
         <h1 class="text-4xl md:text-6xl font-bold text-sky-600 text-center animate-fade-in">
             Página de Inicio
         </h1>
+        <div class="text-center mt-10">
+            <a href="{% url 'campannias:index' %}" class="bg-sky-600 text-white px-6 py-3 rounded hover:bg-sky-700">
+                Gestionar Campañas
+            </a>
+        </div>
     </main>
 </body>
 </html>

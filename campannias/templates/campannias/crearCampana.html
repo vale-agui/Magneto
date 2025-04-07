@@ -1,0 +1,6 @@
+<form method="post" action="{% url 'campannias:crear_google' %}">
+    {% csrf_token %}
+    <button type="submit" class="bg-sky-600 text-white px-5 py-2 rounded hover:bg-sky-700">
+        Crear campaña de prueba en Google Ads
+    </button>
+</form>
