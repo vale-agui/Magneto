@@ -7,10 +7,9 @@ from google.ads.googleads.errors import GoogleAdsException
 import requests
 from .models import CredencialAPI_google
 from pathlib import Path
+from .services.ads_google import crear_campana_google_ads
+from django.contrib import messages
 
-
-yaml_path = Path(__file__).resolve().parent.parent / "google-ads.yaml"
-client = GoogleAdsClient.load_from_storage(str(yaml_path))
 
 def index(request):
     return render(request, 'campannias/crearCampana.html')
@@ -18,25 +17,13 @@ def index(request):
 def crear_campana_google(request):
     if request.method == "POST":
         try:
-            yaml_path = Path(__file__).resolve().parent.parent / "google-ads.yaml"
-            client = GoogleAdsClient.load_from_storage(str(yaml_path))
-            ga_service = client.get_service("GoogleAdsService")
-
-            query = """
-                SELECT campaign.id, campaign.name
-                FROM campaign
-            """
-            response = ga_service.search_stream(customer_id="2454952399", query=query)
-
-            for batch in response:
-                for row in batch.results:
-                    print(f"{row.campaign.id} - {row.campaign.name}")
-
+            response = crear_campana_google_ads(request)
+            messages.success(request, "¡Campaña creada exitosamente!")
             return redirect('campannias:index')
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"mensaje": "Método no permitido"}, status=405)
+            messages.error(request, f"Error al crear campaña: {str(e)}")
+            return redirect('campannias:index')
+    return render(request, 'campannias/crearCampana.html')
 
 def google_auth_start(request):
     base_url = "https://accounts.google.com/o/oauth2/v2/auth"
