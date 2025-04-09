@@ -24,5 +24,6 @@ urlpatterns = [
     path('', include('inicio.urls')),  # La raíz muestra la vista 'home' de shopping
     path('accounts/', include('accounts.urls')),# Accesos a registro, login, logout
     path('campannias/', include('campannias.urls')),
+    path('vacantes/', include('vacantes.urls')),
 
 ]

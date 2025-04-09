@@ -65,9 +65,13 @@
         <h1 class="text-4xl md:text-6xl font-bold text-sky-600 text-center animate-fade-in">
             Página de Inicio
         </h1>
-        <div class="text-center mt-10">
+
+        <div class="flex justify-center gap-6 mt-10">
             <a href="{% url 'campannias:index' %}" class="bg-sky-600 text-white px-6 py-3 rounded hover:bg-sky-700">
                 Gestionar Campañas
+            </a>
+            <a href="{% url 'vacantes:gestion_vacantes' %}" class="bg-sky-600 text-white px-6 py-3 rounded hover:bg-sky-700">
+                Gestión de Vacantes
             </a>
         </div>
     </main>

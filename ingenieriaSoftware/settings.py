@@ -15,7 +15,9 @@ from pathlib import Path
 
 load_dotenv() 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
+BASE_DIR = Path(__file__).resolve().parent.parent 
+load_dotenv(BASE_DIR / ".env") 
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'inicio',
     'accounts',
     'campannias',
+    'vacantes',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +129,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+# Facebook Ads
+FACEBOOK_ACCESS_TOKEN = os.getenv("FACEBOOK_ACCESS_TOKEN")
+FACEBOOK_AD_ACCOUNT_ID = os.getenv("FACEBOOK_AD_ACCOUNT_ID")
+FACEBOOK_APP_ID = os.getenv("FACEBOOK_APP_ID")
+FACEBOOK_APP_SECRET = os.getenv("FACEBOOK_APP_SECRET")
+FACEBOOK_REDIRECT_URI = os.getenv("FACEBOOK_REDIRECT_URI")
+
+
+print("DEBUG: FACEBOOK_AD_ACCOUNT_ID = ", os.getenv("FACEBOOK_AD_ACCOUNT_ID"))
+
+

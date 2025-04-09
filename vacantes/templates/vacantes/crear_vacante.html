@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Vacante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sky: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-sky-50 font-sans">
+    <main class="container mx-auto px-4 py-12">
+        <h1 class="text-3xl md:text-5xl font-bold text-sky-700 text-center mb-10">
+            Crear Nueva Vacante
+        </h1>
+
+        <div class="max-w-xl mx-auto bg-white p-8 rounded shadow">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="flex justify-center">
+                    <button type="submit" class="bg-sky-600 text-white px-6 py-2 rounded hover:bg-sky-700">
+                        Guardar Vacante
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
