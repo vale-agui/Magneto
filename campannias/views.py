@@ -18,10 +18,19 @@ def crear_campana_google(request):
     if request.method == "POST":
         try:
             response = crear_campana_google_ads(request)
-            messages.success(request, "¡Campaña creada exitosamente!")
+            if isinstance(response, JsonResponse):  # Si hubo error y se devuelve Json
+                errores = response.content.decode('utf-8')
+                messages.error(request, f"Error al crear campaña: {errores}")
+            else:
+                messages.success(request, "¡Campaña creada exitosamente!")
+            return redirect('campannias:index')
+        except GoogleAdsException as ex:
+            for error in ex.failure.errors:
+                mensaje = f"{error.message} (Campo: {getattr(error.location, 'field_path_elements', 'N/A')})"
+                messages.error(request, mensaje)
             return redirect('campannias:index')
         except Exception as e:
-            messages.error(request, f"Error al crear campaña: {str(e)}")
+            messages.error(request, f"Error inesperado: {str(e)}")
             return redirect('campannias:index')
     return render(request, 'campannias/crearCampana.html')
 
