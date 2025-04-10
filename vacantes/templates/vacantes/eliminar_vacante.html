@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eliminar Vacante</title>
+</head>
+<body>
+    <h2>¿Estás seguro que deseas eliminar la vacante "{{ vacante.nombre }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Sí, eliminar</button>
+        <a href="{% url 'listar_vacantes' %}">Cancelar</a>
+    </form>
+</body>
+</html>

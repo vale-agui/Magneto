@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Vacantes</title>
+</head>
+<body>
+    <h1>Vacantes Registradas</h1>
+
+    <a href="{% url 'crear_vacante' %}">
+        <button>Crear Vacante</button>
+    </a>
+
+    <ul>
+        {% for vacante in vacantes %}
+            <li>
+                {{ vacante.nombre }} - {{ vacante.especialidad }}
+                <form method="post" action="{% url 'eliminar_vacante' vacante.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Eliminar</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>No hay vacantes registradas.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
