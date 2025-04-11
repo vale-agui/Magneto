@@ -4,76 +4,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magneto - Página de Inicio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>ÉLAN AUTOMATE - Página de Inicio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        sky: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                    },
-                    fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
-                    },
-                },
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#1D4ED8', /* Azul */
+              secondary: '#059669', /* Verde */
             },
-        }
+            fontFamily: {
+              sans: ['Poppins', 'sans-serif'],
+            },
+          },
+        },
+      }
     </script>
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .animate-fade-in {
-            animation: fadeIn 1s ease-out;
-        }
-    </style>
 </head>
-<body class="min-h-screen bg-sky-50 font-sans">
-    <!-- Encabezado simple con el logo -->
-    <header class="flex items-center justify-between bg-white p-4 shadow">
-        <a href="{% url 'home' %}" class="text-2xl font-bold text-sky-600">ÉLAN AUTOMATE</a>
-        <!-- Sección de autenticación -->
-        {% if user.is_authenticated %}
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-700">Bienvenido, {{ user.username }}</span>
-                <a href="{% url 'accounts:logout' %}" class="bg-sky-600 text-white py-2 px-4 rounded hover:bg-sky-700">Cerrar Sesión</a>
-            </div>
-        {% else %}
-            <div class="flex items-center space-x-4">
-                <a href="{% url 'accounts:login' %}" class="bg-sky-600 text-white py-2 px-4 rounded hover:bg-sky-700">Iniciar Sesión</a>
-                <a href="{% url 'accounts:register' %}" class="bg-sky-600 text-white py-2 px-4 rounded hover:bg-sky-700">Registrarse</a>
-            </div>
-        {% endif %}
-    </header>
+<body class="min-h-screen flex flex-col bg-gradient-to-r from-blue-200 to-green-200 font-sans">
 
-    <!-- Contenido principal: Página de Inicio -->
-    <main class="container mx-auto px-4 py-8 md:py-16">
-        <h1 class="text-4xl md:text-6xl font-bold text-sky-600 text-center animate-fade-in">
-            Página de Inicio
-        </h1>
+  <!-- Encabezado simple con el logo y bienvenida -->
+  <header class="flex items-center justify-between bg-white px-6 py-4 shadow">
+    <a href="{% url 'home' %}" class="text-2xl font-bold">
+        <span class="text-green-600">ÉLAN</span>
+        <span class="text-sky-600">AUTOMATE</span>
+      </a>
 
-        <div class="flex justify-center gap-6 mt-10">
-            <a href="{% url 'campannias:index' %}" class="bg-sky-600 text-white px-6 py-3 rounded hover:bg-sky-700">
-                Gestionar Campañas
-            </a>
-            <a href="{% url 'vacantes:gestion_vacantes' %}" class="bg-sky-600 text-white px-6 py-3 rounded hover:bg-sky-700">
-                Gestión de Vacantes
-            </a>
-        </div>
-    </main>
+    <!-- Sección de autenticación -->
+    {% if user.is_authenticated %}
+      <div class="flex items-center space-x-4">
+        <span class="text-gray-700">Bienvenido, {{ user.username }}</span>
+        <a href="{% url 'accounts:logout' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">
+          Cerrar Sesión
+        </a>
+      </div>
+    {% else %}
+      <div class="flex items-center space-x-4">
+        <a href="{% url 'accounts:login' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">Iniciar Sesión</a>
+        <a href="{% url 'accounts:register' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">Registrarse</a>
+      </div>
+    {% endif %}
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 container mx-auto px-4 py-16 text-center">
+    <h1 class="text-5xl font-extrabold text-primary mb-8">Página de Inicio</h1>
+    <p class="text-xl text-gray-700 max-w-2xl mx-auto">
+      Bienvenido(a) Magneto, progresa con ÉLAN, sé parte del futuro.
+    </p>
+
+    <div class="flex justify-center gap-6 mt-10">
+      <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
+        Gestionar Campañas
+      </a>
+      <a href="{% url 'vacantes:gestion_vacantes' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
+        Gestión de Vacantes
+      </a>
+    </div>
+  </main>
+
+  <!-- Pie de página opcional -->
+  <footer class="bg-white p-4 text-center text-gray-500">
+    © {{ now|date:"Y" }} ÉLAN AUTOMATE. Todos los derechos reservados.
+  </footer>
 </body>
 </html>
