@@ -56,8 +56,50 @@
 
     <div class="flex justify-center gap-6 mt-10">
       <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
-        Gestionar Campañas
+        Crear Campañas
       </a>
+      <div class="relative">
+        <button id="gestionarBtn" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300 flex items-center">
+          Gestionar Campañas
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div id="gestionarMenu" class="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 hidden">
+          <a href="{% url 'campannias:listar_campanias' %}" class="block px-4 py-2 text-gray-800 hover:bg-primary hover:text-white">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Ver Campañas
+            </div>
+          </a>
+          <a href="{% url 'campannias:total_gastado' %}" class="block px-4 py-2 text-gray-800 hover:bg-primary hover:text-white">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Total Gastado
+            </div>
+          </a>
+          <a href="{% url 'campannias:costo_por_campania' %}" class="block px-4 py-2 text-gray-800 hover:bg-primary hover:text-white">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+              </svg>
+              Costo por Campaña
+            </div>
+          </a>
+          <a href="{% url 'campannias:reutilizar_campanias' %}" class="block px-4 py-2 text-gray-800 hover:bg-primary hover:text-white">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Reutilizar Campañas
+            </div>
+          </a>
+        </div>
+      </div>
       <a href="{% url 'vacantes:gestion_vacantes' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
         Gestión de Vacantes
       </a>
@@ -68,5 +110,24 @@
   <footer class="bg-white p-4 text-center text-gray-500">
     © {{ now|date:"Y" }} ÉLAN AUTOMATE. Todos los derechos reservados.
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const gestionarBtn = document.getElementById('gestionarBtn');
+      const gestionarMenu = document.getElementById('gestionarMenu');
+      
+      gestionarBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        gestionarMenu.classList.toggle('hidden');
+      });
+
+      // Cerrar el menú al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (!gestionarBtn.contains(e.target) && !gestionarMenu.contains(e.target)) {
+          gestionarMenu.classList.add('hidden');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

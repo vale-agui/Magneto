@@ -5,10 +5,11 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import CampaniaFacebook, CampaniaInstagram, CampaniaGoogle, ResultadoCampania
+from .models import CampanaFacebook, CampanaGoogle, ResultadoCampania, CampaniaFacebook, CampaniaInstagram, CampaniaGoogle
 from .forms import CampaniaFacebookForm, CampaniaInstagramForm, CampaniaGoogleForm
 import random
 from datetime import timedelta
+from django.db.models import Sum
 
 # Importar servicios
 from .services.ads_google import (
@@ -61,38 +62,104 @@ def crear_instagram_view(request):
 ### VISTAS PARA PROCESAR LAS SOLICITUDES
 ##########################
 
-@csrf_exempt
+@login_required
 def crear_campana_google(request):
     """Procesa la creación de campañas en Google Ads"""
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
-            respuesta = crear_campana_google_ads(request)
-            if isinstance(respuesta, JsonResponse):
-                errores = respuesta.content.decode('utf-8')
-                messages.error(request, f"Error al crear campaña: {errores}")
-            else:
-                messages.success(request, "¡Campaña creada exitosamente!")
-            return redirect('campannias:crear_google_view')
+            # Validar requisitos básicos
+            if not request.POST.get('customer_id'):
+                messages.error(request, 'Se requiere un ID de cliente de Google Ads válido.')
+                return render(request, 'campannias/crearCampanaGoogle.html')
+            
+            if not request.POST.get('developer_token'):
+                messages.error(request, 'Se requiere un Developer Token válido.')
+                return render(request, 'campannias/crearCampanaGoogle.html')
+            
+            # Crear nueva campaña
+            campana = CampanaGoogle(
+                # Campos de autenticación
+                customer_id=request.POST['customer_id'],
+                developer_token=request.POST['developer_token'],
+                refresh_token=request.POST.get('refresh_token', ''),
+                access_token=request.POST.get('access_token', ''),
+                mcc_account=request.POST.get('mcc_account') == 'on',
+                
+                # Campos básicos
+                nombre=request.POST['nombre'],
+                tipo_campana=request.POST['tipo_campana'],
+                presupuesto_diario=float(request.POST['presupuesto_diario']),
+                fecha_inicio=request.POST['fecha_inicio'],
+                fecha_fin=request.POST['fecha_fin'],
+                
+                # Configuración de segmentación
+                palabras_clave=request.POST['palabras_clave'],
+                ubicaciones=request.POST['ubicaciones'],
+                idiomas=request.POST['idiomas'],
+                
+                # Configuración de pujas
+                puja_maxima=float(request.POST['puja_maxima']),
+                estrategia_puja=request.POST['estrategia_puja'],
+                
+                # Estado y usuario
+                estado=request.POST.get('estado', 'PAUSED'),
+                usuario=request.user
+            )
+            
+            # Validar tokens de OAuth
+            if not campana.refresh_token or not campana.access_token:
+                messages.error(request, 'Se requieren tokens de OAuth 2.0 válidos.')
+                return render(request, 'campannias/crearCampanaGoogle.html')
+            
+            # Guardar la campaña
+            campana.save()
+            
+            messages.success(request, 'Campaña de Google Ads creada exitosamente.')
+            
+            # Si se marcó reutilizar datos, redirigir a la siguiente red
+            if request.POST.get('reutilizar_datos'):
+                return redirect('campannias:crear_campana_facebook')
+            return redirect('campannias:listar_campanias')
+            
         except Exception as e:
-            messages.error(request, f"Error inesperado: {str(e)}")
-            return redirect('campannias:crear_google_view')
+            messages.error(request, f'Error al crear la campaña: {str(e)}')
+            return render(request, 'campannias/crearCampanaGoogle.html')
+    
     return render(request, 'campannias/crearCampanaGoogle.html')
 
-@csrf_exempt
+@login_required
 def crear_campana_facebook(request):
-    """Procesa la creación de campañas en Facebook Ads"""
-    if request.method == "POST":
+    if request.method == 'POST':
         try:
-            respuesta = crear_campana_facebook_ads(request)
-            if isinstance(respuesta, JsonResponse):
-                errores = respuesta.content.decode('utf-8')
-                messages.error(request, f"Error al crear campaña Facebook: {errores}")
-            else:
-                messages.success(request, "¡Campaña Facebook creada exitosamente!")
-            return redirect('campannias:crear_facebook_view')
+            # Crear nueva campaña
+            campana = CampanaFacebook(
+                nombre=request.POST['name'],
+                campaign_id=request.POST['campaign_id'],
+                tipo_presupuesto=request.POST['budget_type'],
+                monto_presupuesto=float(request.POST['budget_amount']) / 100,  # Convertir centavos a dólares
+                evento_cobro=request.POST['billing_event'],
+                objetivo_optimizacion=request.POST['optimization_goal'],
+                edad_min=request.POST['age_min'],
+                edad_max=request.POST['age_max'],
+                genero=request.POST['gender'],
+                ubicaciones=request.POST['locations'],
+                intereses=request.POST.get('interests', ''),
+                estado=request.POST['status'],
+                usuario=request.user
+            )
+            campana.save()
+            
+            messages.success(request, 'Campaña de Facebook creada exitosamente.')
+            
+            # Si se marcó reutilizar datos, redirigir a la siguiente red
+            if request.POST.get('reutilizar_datos'):
+                return redirect('campannias:crear_campana_instagram')
+            return redirect('campannias:listar_campanias')
+            
         except Exception as e:
-            messages.error(request, f"Error inesperado: {str(e)}")
-            return redirect('campannias:crear_facebook_view')
+            messages.error(request, f'Error al crear la campaña: {str(e)}')
+            return render(request, 'campannias/crearCampanaFacebook.html')
+    
     return render(request, 'campannias/crearCampanaFacebook.html')
 
 @csrf_exempt
@@ -203,10 +270,20 @@ def obtener_metricas(request, pk):
     
     return JsonResponse(metricas)
 
+@login_required
 def listar_campanias(request):
-    from .models import CampaniaGoogle
-    campanias = CampaniaGoogle.objects.all()
-    return render(request, 'campannias/lista_campanias.html', {'campanias': campanias})
+    # Obtener todas las campañas de cada red social
+    campanias_google = CampanaGoogle.objects.all().order_by('-fecha_creacion')
+    campanias_facebook = CampanaFacebook.objects.all().order_by('-fecha_creacion')
+    campanias_instagram = CampaniaInstagram.objects.all().order_by('-fecha_creacion')
+    
+    context = {
+        'campanias_google': campanias_google,
+        'campanias_facebook': campanias_facebook,
+        'campanias_instagram': campanias_instagram,
+    }
+    
+    return render(request, 'campannias/lista_campanias.html', context)
 
 def seleccionar_redes(request):
     if request.method == 'POST':
@@ -284,5 +361,54 @@ def crear_campania_dinamica(request):
         'form': form,
         'activar_desactivar_url': f"{request.path}?reset=1"
     })
+
+def total_gastado(request):
+    """Muestra el total gastado en todas las campañas"""
+    # Obtener el total gastado por cada tipo de campaña
+    total_google = CampaniaGoogle.objects.aggregate(total=Sum('presupuesto'))['total'] or 0
+    total_facebook = CampaniaFacebook.objects.aggregate(total=Sum('presupuesto'))['total'] or 0
+    total_instagram = CampaniaInstagram.objects.aggregate(total=Sum('presupuesto'))['total'] or 0
+    
+    # Calcular el total general
+    total_general = total_google + total_facebook + total_instagram
+    
+    context = {
+        'total_google': total_google,
+        'total_facebook': total_facebook,
+        'total_instagram': total_instagram,
+        'total_general': total_general
+    }
+    
+    return render(request, 'campannias/total_gastado.html', context)
+
+def costo_por_campania(request):
+    """Muestra el costo de cada campaña individual"""
+    # Obtener todas las campañas
+    campanias_google = CampaniaGoogle.objects.all()
+    campanias_facebook = CampaniaFacebook.objects.all()
+    campanias_instagram = CampaniaInstagram.objects.all()
+    
+    context = {
+        'campanias_google': campanias_google,
+        'campanias_facebook': campanias_facebook,
+        'campanias_instagram': campanias_instagram
+    }
+    
+    return render(request, 'campannias/costo_por_campania.html', context)
+
+def reutilizar_campanias(request):
+    """Muestra las campañas que pueden ser reutilizadas"""
+    # Obtener campañas finalizadas o exitosas que pueden ser reutilizadas
+    campanias_google = CampaniaGoogle.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
+    campanias_facebook = CampaniaFacebook.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
+    campanias_instagram = CampaniaInstagram.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
+    
+    context = {
+        'campanias_google': campanias_google,
+        'campanias_facebook': campanias_facebook,
+        'campanias_instagram': campanias_instagram
+    }
+    
+    return render(request, 'campannias/reutilizar_campanias.html', context)
 
 

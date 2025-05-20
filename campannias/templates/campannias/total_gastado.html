@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-3xl font-bold text-primary mb-6">Total Gastado en Campañas</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total General -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Total General</h2>
+            <p class="text-3xl font-bold text-primary">${{ total_general|floatformat:2 }}</p>
+        </div>
+        
+        <!-- Google Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Google Ads</h2>
+            <p class="text-3xl font-bold text-primary">${{ total_google|floatformat:2 }}</p>
+        </div>
+        
+        <!-- Facebook Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Facebook Ads</h2>
+            <p class="text-3xl font-bold text-primary">${{ total_facebook|floatformat:2 }}</p>
+        </div>
+        
+        <!-- Instagram Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Instagram Ads</h2>
+            <p class="text-3xl font-bold text-primary">${{ total_instagram|floatformat:2 }}</p>
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
+            Volver al Inicio
+        </a>
+    </div>
+</div>
+{% endblock %} 

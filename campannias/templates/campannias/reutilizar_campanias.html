@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-3xl font-bold text-primary mb-6">Reutilizar Campañas</h1>
+    
+    <!-- Google Ads -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Ads</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for campania in campanias_google %}
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
+                <p class="text-sm text-gray-600 mb-4">Estado: {{ campania.get_estado_display }}</p>
+                <div class="space-y-2">
+                    <p class="text-sm"><span class="font-semibold">Presupuesto:</span> ${{ campania.presupuesto|floatformat:2 }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de inicio:</span> {{ campania.fecha_inicio|date:"d/m/Y" }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de fin:</span> {{ campania.fecha_fin|date:"d/m/Y" }}</p>
+                </div>
+                <button 
+                    class="mt-4 w-full bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition duration-300"
+                    data-tipo="google"
+                    data-id="{{ campania.id }}"
+                    onclick="reutilizarCampania(this)">
+                    Reutilizar Campaña
+                </button>
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <p class="text-gray-600">No hay campañas de Google Ads disponibles para reutilizar.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Facebook Ads -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Facebook Ads</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for campania in campanias_facebook %}
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
+                <p class="text-sm text-gray-600 mb-4">Estado: {{ campania.get_estado_display }}</p>
+                <div class="space-y-2">
+                    <p class="text-sm"><span class="font-semibold">Presupuesto:</span> ${{ campania.presupuesto|floatformat:2 }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de inicio:</span> {{ campania.fecha_inicio|date:"d/m/Y" }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de fin:</span> {{ campania.fecha_fin|date:"d/m/Y" }}</p>
+                </div>
+                <button 
+                    class="mt-4 w-full bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition duration-300"
+                    data-tipo="facebook"
+                    data-id="{{ campania.id }}"
+                    onclick="reutilizarCampania(this)">
+                    Reutilizar Campaña
+                </button>
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <p class="text-gray-600">No hay campañas de Facebook Ads disponibles para reutilizar.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Instagram Ads -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Instagram Ads</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for campania in campanias_instagram %}
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
+                <p class="text-sm text-gray-600 mb-4">Estado: {{ campania.get_estado_display }}</p>
+                <div class="space-y-2">
+                    <p class="text-sm"><span class="font-semibold">Presupuesto:</span> ${{ campania.presupuesto|floatformat:2 }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de inicio:</span> {{ campania.fecha_inicio|date:"d/m/Y" }}</p>
+                    <p class="text-sm"><span class="font-semibold">Fecha de fin:</span> {{ campania.fecha_fin|date:"d/m/Y" }}</p>
+                </div>
+                <button 
+                    class="mt-4 w-full bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition duration-300"
+                    data-tipo="instagram"
+                    data-id="{{ campania.id }}"
+                    onclick="reutilizarCampania(this)">
+                    Reutilizar Campaña
+                </button>
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <p class="text-gray-600">No hay campañas de Instagram Ads disponibles para reutilizar.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
+            Volver al Inicio
+        </a>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function reutilizarCampania(button) {
+    const tipo = button.getAttribute('data-tipo');
+    const id = button.getAttribute('data-id');
+    window.location.href = `/campannias/crear/${tipo}/?reutilizar=${id}`;
+}
+</script>
+{% endblock %}
+{% endblock %} 

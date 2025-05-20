@@ -7,6 +7,14 @@
     <div class="mb-6 text-center">
         <h2 class="text-3xl font-bold text-primary">Configurando campaña para <span class="text-secondary">Google Ads</span></h2>
         <p class="text-gray-600 mt-2">Completa los campos requeridos para tu campaña en Google Ads.</p>
+        <div class="mt-4">
+            <a href="{% url 'campannias:listar_campanias' %}" class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded hover:bg-secondary-dark transition duration-300">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                Ver campañas existentes
+            </a>
+        </div>
     </div>
     {% if messages %}
     <div class="messages">
@@ -19,82 +27,142 @@
     {% endif %}
     <div class="card">
         <div class="card-body">
-            <form method="post" action="{{ request.path }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
+            <form method="post" action="{% url 'campannias:crear_campana_google' %}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
                 {% csrf_token %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2">{{ form.nombre.label }}</label>
-                        {{ form.nombre|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                        {{ form.nombre.errors }}
+                
+                <!-- Sección de Autenticación y Configuración -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Cuenta Google Ads</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Customer ID</label>
+                            <input type="text" name="customer_id" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa tu Customer ID">
+                            <p class="text-sm text-gray-500 mt-1">ID de cliente de Google Ads</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Developer Token</label>
+                            <input type="text" name="developer_token" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa tu Developer Token">
+                            <p class="text-sm text-gray-500 mt-1">Token de desarrollador aprobado por Google</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Refresh Token</label>
+                            <input type="text" name="refresh_token" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa tu Refresh Token">
+                            <p class="text-sm text-gray-500 mt-1">Token de actualización de OAuth 2.0</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Access Token</label>
+                            <input type="text" name="access_token" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa tu Access Token">
+                            <p class="text-sm text-gray-500 mt-1">Token de acceso de OAuth 2.0</p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="mcc_account" class="form-checkbox h-5 w-5 text-primary">
+                                <span class="text-gray-700">Esta es una cuenta MCC (Manager Account)</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2">{{ form.presupuesto_diario.label }}</label>
-                        {{ form.presupuesto_diario|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                        {{ form.presupuesto_diario.errors }}
+                </div>
+
+                <!-- Sección de Configuración de Campaña -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Campaña</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Nombre de la Campaña</label>
+                            <input type="text" name="nombre" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa el nombre de la campaña">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Tipo de Campaña</label>
+                            <select name="tipo_campana" required
+                                    class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="SEARCH">Búsqueda</option>
+                                <option value="DISPLAY">Display</option>
+                                <option value="VIDEO">Video</option>
+                                <option value="SHOPPING">Shopping</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Presupuesto Diario</label>
+                            <input type="number" name="presupuesto_diario" required step="0.01"
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa el presupuesto diario">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Fecha de Inicio</label>
+                            <input type="date" name="fecha_inicio" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Fecha de Fin</label>
+                            <input type="date" name="fecha_fin" required
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_inicio.label }}</label>
-                        {{ form.fecha_inicio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                        {{ form.fecha_inicio.errors }}
+                </div>
+
+                <!-- Sección de Configuración de Anuncios -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Anuncios</h3>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Palabras Clave</label>
+                            <textarea name="palabras_clave" required
+                                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                      placeholder="Ingresa las palabras clave separadas por comas"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Ubicaciones</label>
+                            <textarea name="ubicaciones" required
+                                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                      placeholder="Ingresa las ubicaciones separadas por comas"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Idiomas</label>
+                            <textarea name="idiomas" required
+                                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                      placeholder="Ingresa los idiomas separados por comas"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Puja Máxima</label>
+                            <input type="number" name="puja_maxima" required step="0.01"
+                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                                   placeholder="Ingresa la puja máxima">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Estrategia de Puja</label>
+                            <select name="estrategia_puja" required
+                                    class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="MANUAL_CPC">CPC Manual</option>
+                                <option value="MAXIMIZE_CONVERSIONS">Maximizar Conversiones</option>
+                                <option value="TARGET_CPA">CPA Objetivo</option>
+                                <option value="TARGET_ROAS">ROAS Objetivo</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_fin.label }}</label>
-                        {{ form.fecha_fin|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                        {{ form.fecha_fin.errors }}
-                    </div>
                 </div>
-                <div class="mt-6">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.tipo_campana.label }}</label>
-                    {{ form.tipo_campana|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.tipo_campana.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.red_anuncios.label }}</label>
-                    {{ form.red_anuncios|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.red_anuncios.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.palabras_clave.label }}</label>
-                    {{ form.palabras_clave|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.palabras_clave.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.puja_maxima.label }}</label>
-                    {{ form.puja_maxima|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.puja_maxima.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.edad_min.label }}</label>
-                    {{ form.edad_min|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.edad_min.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.edad_max.label }}</label>
-                    {{ form.edad_max|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.edad_max.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.genero.label }}</label>
-                    {{ form.genero|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.genero.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion.label }}</label>
-                    {{ form.ubicacion|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.ubicacion.errors }}
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">{{ form.intereses.label }}</label>
-                    {{ form.intereses|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                    {{ form.intereses.errors }}
-                </div>
+
                 <div class="flex items-center my-4">
                     <label for="reutilizar_datos" class="mr-2 font-semibold">Guardar datos para la siguiente red</label>
                     <label class="switch">
-                      <input type="checkbox" id="reutilizar_datos" name="reutilizar_datos" checked>
-                      <span class="slider round"></span>
+                        <input type="checkbox" id="reutilizar_datos" name="reutilizar_datos" checked>
+                        <span class="slider round"></span>
                     </label>
                 </div>
+
                 <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-secondary transition duration-300">Guardar y continuar</button>
             </form>
         </div>
@@ -105,8 +173,8 @@
 <script>
     // Validación de fechas
     document.addEventListener('DOMContentLoaded', function() {
-        const fechaInicio = document.getElementById('fecha_inicio');
-        const fechaFin = document.getElementById('fecha_fin');
+        const fechaInicio = document.querySelector('input[name="fecha_inicio"]');
+        const fechaFin = document.querySelector('input[name="fecha_fin"]');
         
         // Establecer fecha mínima como hoy
         const hoy = new Date().toISOString().split('T')[0];
@@ -125,36 +193,36 @@
 </script>
 <style>
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
 }
 .switch input {display:none;}
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
 }
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
 }
 input:checked + .slider {
-  background-color: #1D4ED8;
+    background-color: #1D4ED8;
 }
 input:checked + .slider:before {
-  transform: translateX(26px);
+    transform: translateX(26px);
 }
 </style>
 {% endblock %}

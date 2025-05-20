@@ -32,4 +32,9 @@ urlpatterns = [
     path('listar/', views.listar_campanias, name='listar_campanias'),
     path('seleccionar-redes/', views.seleccionar_redes, name='seleccionar_redes'),
     path('crear-campania-dinamica/', views.crear_campania_dinamica, name='crear_campania_dinamica'),
+    
+    # Nuevas URLs para gestión de campañas
+    path('total-gastado/', views.total_gastado, name='total_gastado'),
+    path('costo-por-campania/', views.costo_por_campania, name='costo_por_campania'),
+    path('reutilizar-campanias/', views.reutilizar_campanias, name='reutilizar_campanias'),
 ]

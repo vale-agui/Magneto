@@ -66,95 +66,139 @@
       </div>
       <form method="post" action="{{ request.path }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
         {% csrf_token %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Sección de Configuración Básica -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-primary mb-4">Configuración Básica</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <label class="block text-gray-700 font-medium mb-2">{{ form.nombre.label }}</label>
-                {{ form.nombre|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                {{ form.nombre.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Nombre del Ad Set</label>
+              <input type="text" name="name" required
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                     placeholder="Ingresa el nombre del conjunto de anuncios">
             </div>
+            
             <div>
-                <label class="block text-gray-700 font-medium mb-2">{{ form.presupuesto.label }}</label>
-                {{ form.presupuesto|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                {{ form.presupuesto.errors }}
+              <label class="block text-gray-700 font-medium mb-2">ID de la Campaña</label>
+              <input type="text" name="campaign_id" required
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                     placeholder="Ingresa el ID de la campaña">
             </div>
+          </div>
+        </div>
+
+        <!-- Sección de Presupuesto -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Presupuesto</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_inicio.label }}</label>
-                {{ form.fecha_inicio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                {{ form.fecha_inicio.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Tipo de Presupuesto</label>
+              <select name="budget_type" required
+                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="daily_budget">Presupuesto Diario</option>
+                <option value="lifetime_budget">Presupuesto Total</option>
+              </select>
             </div>
+            
             <div>
-                <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_fin.label }}</label>
-                {{ form.fecha_fin|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-                {{ form.fecha_fin.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Monto del Presupuesto (centavos)</label>
+              <input type="number" name="budget_amount" required min="0"
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                     placeholder="Ej: 1000 para $10.00">
+              <p class="text-sm text-gray-500 mt-1">Ingresa el monto en centavos (ej: 1000 = $10.00)</p>
             </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Evento de Cobro</label>
+              <select name="billing_event" required
+                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="IMPRESSIONS">Impresiones</option>
+                <option value="CLICKS">Clics</option>
+                <option value="LINK_CLICKS">Clics en Enlaces</option>
+                <option value="VIDEO_VIEWS">Vistas de Video</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Objetivo de Optimización</label>
+              <select name="optimization_goal" required
+                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="LINK_CLICKS">Clics en Enlaces</option>
+                <option value="REACH">Alcance</option>
+                <option value="IMPRESSIONS">Impresiones</option>
+                <option value="VIDEO_VIEWS">Vistas de Video</option>
+                <option value="POST_ENGAGEMENT">Interacción con Publicaciones</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="mt-6">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.objetivo.label }}</label>
-            {{ form.objetivo|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.objetivo.errors }}
+
+        <!-- Sección de Segmentación -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-primary mb-4">Segmentación</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Rango de Edad</label>
+              <div class="flex gap-4">
+                <input type="number" name="age_min" required min="13" max="65"
+                       class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                       placeholder="Edad mínima">
+                <input type="number" name="age_max" required min="13" max="65"
+                       class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                       placeholder="Edad máxima">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Género</label>
+              <select name="gender" required
+                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="ALL">Todos</option>
+                <option value="MALE">Masculino</option>
+                <option value="FEMALE">Femenino</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Ubicaciones</label>
+              <input type="text" name="locations" required
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                     placeholder="Países, ciudades o regiones (separados por comas)">
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Intereses</label>
+              <input type="text" name="interests"
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                     placeholder="Intereses (separados por comas)">
+            </div>
+          </div>
         </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.tipo_anuncio.label }}</label>
-            {{ form.tipo_anuncio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.tipo_anuncio.errors }}
+
+        <!-- Sección de Estado -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-primary mb-4">Estado de la Campaña</h3>
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Estado Inicial</label>
+              <select name="status" required
+                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="ACTIVE">Activa</option>
+                <option value="PAUSED">Pausada</option>
+              </select>
+              <p class="text-sm text-gray-500 mt-1">La campaña se creará en este estado</p>
+            </div>
+          </div>
         </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.formato_anuncio.label }}</label>
-            {{ form.formato_anuncio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.formato_anuncio.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion_anuncio.label }}</label>
-            {{ form.ubicacion_anuncio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.ubicacion_anuncio.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.edad_min.label }}</label>
-            {{ form.edad_min|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.edad_min.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.edad_max.label }}</label>
-            {{ form.edad_max|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.edad_max.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.genero.label }}</label>
-            {{ form.genero|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.genero.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion.label }}</label>
-            {{ form.ubicacion|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.ubicacion.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.intereses.label }}</label>
-            {{ form.intereses|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.intereses.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.idioma.label }}</label>
-            {{ form.idioma|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.idioma.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.dispositivo.label }}</label>
-            {{ form.dispositivo|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.dispositivo.errors }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium mb-2">{{ form.comportamiento.label }}</label>
-            {{ form.comportamiento|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-            {{ form.comportamiento.errors }}
-        </div>
+
         <div class="flex items-center my-4">
-            <label for="reutilizar_datos" class="mr-2 font-semibold">Guardar datos para la siguiente red</label>
-            <label class="switch">
-              <input type="checkbox" id="reutilizar_datos" name="reutilizar_datos" checked>
-              <span class="slider round"></span>
-            </label>
+          <label for="reutilizar_datos" class="mr-2 font-semibold">Guardar datos para la siguiente red</label>
+          <label class="switch">
+            <input type="checkbox" id="reutilizar_datos" name="reutilizar_datos" checked>
+            <span class="slider round"></span>
+          </label>
         </div>
+
         <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-secondary transition duration-300">Guardar y continuar</button>
       </form>
     </div>
