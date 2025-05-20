@@ -1,5 +1,7 @@
 from django.contrib import admin
+from .models import CampaniaFacebook, CampaniaInstagram, CampaniaGoogle, ResultadoCampania
 
-from .models import CredencialAPI_google
-
-admin.site.register(CredencialAPI_google)
+admin.site.register(CampaniaFacebook)
+admin.site.register(CampaniaInstagram)
+admin.site.register(CampaniaGoogle)
+admin.site.register(ResultadoCampania)

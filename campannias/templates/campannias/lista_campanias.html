@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Campañas Publicitarias</h1>
+        <a href="{% url 'campannias:index' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Campaña
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        {% for campania in campanias %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ campania.nombre }}</h5>
+                    <p class="card-text">{{ campania.descripcion|truncatewords:30 }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-{{ campania.estado|yesno:'success,warning,danger,secondary' }}">
+                            {{ campania.get_estado_display }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Del {{ campania.fecha_inicio|date:"d/m/Y" }} al {{ campania.fecha_fin|date:"d/m/Y" }}
+                        </small>
+                        <a href="{% url 'campannias:detalle_campania' campania.pk %}" class="btn btn-outline-primary btn-sm">
+                            Ver detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No hay campañas creadas. ¡Crea tu primera campaña!
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

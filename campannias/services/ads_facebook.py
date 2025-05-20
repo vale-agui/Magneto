@@ -1,128 +1,171 @@
 # services/ads_facebook.py
 
 import os
-from pathlib import Path
-import requests
+from datetime import datetime, timedelta
+import random
+import json
 from django.http import JsonResponse
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.user import User
-from dotenv import load_dotenv
 
-# Importa el modelo que almacena los tokens de Facebook
-from campannias.models import CredencialAPI_facebook
+# Configuración de credenciales simuladas
+MOCK_CREDENTIALS = {
+    "access_token": "mock_facebook_access_token",
+    "app_id": "mock_facebook_app_id",
+    "app_secret": "mock_facebook_app_secret",
+    "token_expiry": (datetime.now() + timedelta(hours=1)).isoformat()
+}
 
+# Cuentas simuladas
+MOCK_ACCOUNTS = [
+    {
+        "id": "act_123456789",
+        "name": "Cuenta Facebook 1",
+        "currency": "MXN",
+        "timezone": "America/Mexico_City"
+    },
+    {
+        "id": "act_987654321",
+        "name": "Cuenta Facebook 2",
+        "currency": "MXN",
+        "timezone": "America/Mexico_City"
+    }
+]
 
-def crear_campana_facebook_ads(request):
-    """
-    Simula la creación de una campaña en Facebook Ads.
-    Obtiene el token guardado en la BD y utiliza los datos definidos para crear (o validar) una campaña.
-    """
-    if request.method not in ["POST", "GET"]:
-        return JsonResponse({"mensaje": "Método no permitido"}, status=405)
+# Campañas simuladas
+MOCK_CAMPAIGNS = [
+    {
+        "id": "camp_111111111",
+        "name": "Campaña Facebook 1",
+        "status": "ACTIVE",
+        "budget": 100.00,
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31"
+    },
+    {
+        "id": "camp_222222222",
+        "name": "Campaña Facebook 2",
+        "status": "ACTIVE",
+        "budget": 200.00,
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31"
+    }
+]
 
-    try:
-        # Obtiene el token desde la BD
-        cred = CredencialAPI_facebook.objects.latest('creado')
-        token = cred.access_token
-    except CredencialAPI_facebook.DoesNotExist:
-        return JsonResponse({"error": "No hay token de Facebook guardado"}, status=404)
+class FacebookAdsSimulator:
+    def __init__(self):
+        self.formatos_anuncio = [
+            "Imagen única",
+            "Video",
+            "Carrusel",
+            "Colección",
+            "Historia"
+        ]
+        
+        self.ubicaciones = [
+            "Feed de Facebook",
+            "Instagram Feed",
+            "Historias",
+            "Audience Network"
+        ]
 
-    try:
-        # Inicializa la API de Facebook
-        FacebookAdsApi.init(
-            access_token=token,
-            app_id=os.environ.get("FACEBOOK_APP_ID"),
-            app_secret=os.environ.get("FACEBOOK_APP_SECRET")
-        )
-
-        # Se utiliza el ID de cuenta de anuncios definido en las variables de entorno
-        ad_account = AdAccount(os.environ.get("FACEBOOK_AD_ACCOUNT_ID"))
-
-        campaign = ad_account.create_campaign(params={
-            'name': 'Campaña de prueba desde Django',
-            'objective': 'LINK_CLICKS',
-            'status': 'PAUSED',
-            'special_ad_categories': [],
-            'execution_options': ['VALIDATE_ONLY']  # Solo se valida, no se crea en realidad
-        })
-
+    def simular_creacion_campana(self, datos_campana):
+        """
+        Simula la creación de una campaña en Facebook Ads
+        """
         return {
-            "mensaje": "Validación exitosa: la campaña se podría crear.",
-            "datos_simulados": campaign
+            "id_campana": f"fb-{random.randint(100000, 999999)}",
+            "nombre": datos_campana.get("nombre", "Campaña Facebook"),
+            "estado": "ACTIVA",
+            "presupuesto_diario": datos_campana.get("presupuesto", 0) / 30,
+            "tipo_campana": random.choice(self.formatos_anuncio),
+            "ubicaciones": random.sample(self.ubicaciones, 2),
+            "fecha_creacion": datetime.now().isoformat(),
+            "metricas_simuladas": {
+                "alcance_estimado": random.randint(5000, 20000),
+                "impresiones_estimadas": random.randint(10000, 40000),
+                "clics_estimados": random.randint(100, 1000),
+                "conversiones_estimadas": random.randint(10, 100),
+                "costo_estimado": round(random.uniform(50, 500), 2)
+            }
         }
 
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    def simular_preview_anuncio(self, datos_anuncio):
+        """
+        Simula cómo se vería el anuncio en Facebook
+        """
+        return {
+            "titulo": datos_anuncio.get("titulo", "Título del Anuncio"),
+            "descripcion": datos_anuncio.get("descripcion", "Descripción del anuncio..."),
+            "url_destino": datos_anuncio.get("url", "https://ejemplo.com"),
+            "formato": random.choice(self.formatos_anuncio),
+            "preview_movil": {
+                "titulo": "Cómo se ve en móvil",
+                "descripcion": "Vista previa en dispositivos móviles"
+            },
+            "preview_escritorio": {
+                "titulo": "Cómo se ve en escritorio",
+                "descripcion": "Vista previa en navegadores de escritorio"
+            }
+        }
 
+    def simular_metricas(self, id_campana):
+        """
+        Simula las métricas de rendimiento de una campaña
+        """
+        return {
+            "alcance": random.randint(1000, 5000),
+            "impresiones": random.randint(2000, 10000),
+            "clics": random.randint(50, 200),
+            "ctr": round(random.uniform(1, 5), 2),
+            "conversiones": random.randint(5, 20),
+            "costo_total": round(random.uniform(100, 500), 2),
+            "cpa": round(random.uniform(5, 25), 2),
+            "roas": round(random.uniform(1, 5), 2)
+        }
 
 def facebook_auth_url():
-    """
-    Construye la URL para iniciar el proceso OAuth con Facebook.
-    Retorna una tupla (url, error), donde error es None si todo está bien.
-    """
-    # Cargar variables de entorno desde el archivo .env (ajusta la ruta según tu proyecto)
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    redirect_uri = os.getenv("FACEBOOK_REDIRECT_URI")
-    client_id = os.getenv("FACEBOOK_APP_ID")
-    scope = "ads_management,business_management"
-
-    if not redirect_uri or not client_id:
-        return None, "Variables de entorno no definidas"
-
-    url = (
-        f"https://www.facebook.com/v18.0/dialog/oauth?"
-        f"client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}&response_type=code"
-    )
-    return url, None
-
+    """Simula la URL de autenticación de Facebook"""
+    return "https://www.facebook.com/v18.0/dialog/oauth?mock=true", None
 
 def facebook_callback_logic(request):
-    """
-    Procesa el callback de Facebook: obtiene el código, lo intercambia por token y lo retorna.
-    En caso de error retorna un JsonResponse de error.
-    """
-    code = request.GET.get('code')
-    if not code:
-        return None, JsonResponse({"error": "No se recibió código de autorización"}, status=400)
-
-    token_url = "https://graph.facebook.com/v18.0/oauth/access_token"
-    data = {
-        "client_id": os.environ.get("FACEBOOK_APP_ID"),
-        "client_secret": os.environ.get("FACEBOOK_APP_SECRET"),
-        "redirect_uri": os.environ.get("FACEBOOK_REDIRECT_URI"),
-        "code": code
-    }
-
-    response = requests.get(token_url, params=data)
-    if response.status_code != 200:
-        return None, JsonResponse({"error": "Error al obtener token", "detalles": response.json()}, status=500)
-
-    tokens = response.json()
-    return tokens, None
-
+    """Simula el manejo del callback de autenticación de Facebook"""
+    return MOCK_CREDENTIALS, None
 
 def listar_cuentas_facebook_service():
-    """
-    Lista las cuentas de anuncios asociadas al usuario de Facebook.
-    Intenta obtener el token desde las variables de entorno (puedes ajustar para obtenerlo de la BD si lo prefieres).
-    """
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    token = os.getenv("FACEBOOK_ACCESS_TOKEN")
-    if not token:
-        return {"error": "Token no encontrado"}
+    """Simula la obtención de cuentas de Facebook Ads"""
+    return MOCK_ACCOUNTS
 
+def crear_campana_facebook_ads(request):
+    """Simula la creación de una campaña en Facebook Ads"""
     try:
-        FacebookAdsApi.init(access_token=token)
-        me = User(fbid='me')
-        accounts = me.get_ad_accounts()
-        resultado = []
-        for account in accounts:
-            resultado.append({
-                "id": account.get("id"),
-                "nombre": account.get("name", "Sin nombre"),
-                "estado": account.get("account_status")
-            })
-        return resultado
+        data = json.loads(request.body)
+        nueva_campana = {
+            "id": f"camp_{len(MOCK_CAMPAIGNS) + 1}",
+            "name": data.get("nombre"),
+            "status": "ACTIVE",
+            "budget": float(data.get("presupuesto_diario", 0)),
+            "start_date": data.get("fecha_inicio"),
+            "end_date": data.get("fecha_fin")
+        }
+        MOCK_CAMPAIGNS.append(nueva_campana)
+        return nueva_campana
     except Exception as e:
         return {"error": str(e)}
+
+def preview_anuncio_facebook(campania):
+    """Simula la vista previa de un anuncio de Facebook"""
+    return {
+        "titulo": f"Vista previa de {campania.nombre}",
+        "descripcion": "Esta es una vista previa simulada de Facebook",
+        "url_destino": "https://ejemplo.com",
+        "imagen": "https://via.placeholder.com/300x200"
+    }
+
+def obtener_metricas_facebook(campania):
+    """Simula la obtención de métricas de una campaña de Facebook"""
+    return {
+        "alcance": random.randint(1000, 10000),
+        "impresiones": random.randint(2000, 20000),
+        "clics": random.randint(100, 1000),
+        "costo": round(random.uniform(100, 1000), 2),
+        "conversiones": random.randint(10, 100)
+    }

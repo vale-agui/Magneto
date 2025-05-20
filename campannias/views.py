@@ -1,105 +1,91 @@
 import os
-from urllib.parse import urlencode
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.http import JsonResponse
-from google.ads.googleads.errors import GoogleAdsException
-import requests
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from pathlib import Path
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import CampaniaFacebook, CampaniaInstagram, CampaniaGoogle, ResultadoCampania
+from .forms import CampaniaFacebookForm, CampaniaInstagramForm, CampaniaGoogleForm
+import random
+from datetime import timedelta
 
+# Importar servicios
 from .services.ads_google import (
+    get_auth_url as google_auth_url,
+    handle_auth_callback as google_auth_callback,
+    refresh_token as google_refresh_token,
+    listar_clientes_ads as google_listar_clientes,
+    listar_campanas_google as google_listar_campanas,
     crear_campana_google_ads,
-    listar_campanas_google,
-    listar_clientes_ads
+    preview_anuncio_google,
+    obtener_metricas_google
 )
 
 from .services.ads_facebook import (
-    crear_campana_facebook_ads,
     facebook_auth_url,
     facebook_callback_logic,
-    listar_cuentas_facebook_service
+    listar_cuentas_facebook_service,
+    crear_campana_facebook_ads,
+    preview_anuncio_facebook,
+    obtener_metricas_facebook
 )
 
-# Importa la lógica para cada plataforma desde el directorio services
-from .services.ads_google import crear_campana_google_ads
-from .services.ads_facebook import crear_campana_facebook_ads
-from .services.ads_instagram import crear_campana_instagram_ads  # Placeholder o implementado
+from .services.ads_instagram import (
+    crear_campana_instagram_ads,
+    preview_anuncio_instagram,
+    obtener_metricas_instagram
+)
 
 ##########################
 ### VISTAS PARA RENDERIZAR FORMULARIOS
 ##########################
 
 def index(request):
-    # Página de inicio, donde se muestran enlaces para cada plataforma
-    return render(request, 'campannias/crearCampana.html')
+    """Página principal que muestra las opciones de plataformas"""
+    return render(request, 'campannias/inicio_campanias.html')
 
 def crear_google_view(request):
-    # Renderiza el formulario para crear campañas en Google Ads
+    """Renderiza el formulario para crear campañas en Google Ads"""
     return render(request, 'campannias/crearCampanaGoogle.html')
 
 def crear_facebook_view(request):
-    # Renderiza el formulario para crear campañas en Facebook Ads
+    """Renderiza el formulario para crear campañas en Facebook Ads"""
     return render(request, 'campannias/crearCampanaFacebook.html')
 
 def crear_instagram_view(request):
-    # Renderiza el formulario para crear campañas en Instagram Ads
+    """Renderiza el formulario para crear campañas en Instagram Ads"""
     return render(request, 'campannias/crearCampanaInstagram.html')
-
 
 ##########################
 ### VISTAS PARA PROCESAR LAS SOLICITUDES
 ##########################
+
+@csrf_exempt
 def crear_campana_google(request):
+    """Procesa la creación de campañas en Google Ads"""
     if request.method == "POST":
         try:
             respuesta = crear_campana_google_ads(request)
-            # Si la respuesta es un JsonResponse se asume que hubo error
             if isinstance(respuesta, JsonResponse):
                 errores = respuesta.content.decode('utf-8')
                 messages.error(request, f"Error al crear campaña: {errores}")
             else:
                 messages.success(request, "¡Campaña creada exitosamente!")
             return redirect('campannias:crear_google_view')
-        except GoogleAdsException as ex:
-            for error in ex.failure.errors:
-                mensaje = f"{error.message} (Campo: {getattr(error.location, 'field_path_elements', 'N/A')})"
-                messages.error(request, mensaje)
-            return redirect('campannias:crear_google_view')
         except Exception as e:
             messages.error(request, f"Error inesperado: {str(e)}")
             return redirect('campannias:crear_google_view')
-
     return render(request, 'campannias/crearCampanaGoogle.html')
-
-
-def listar_campanas_google_view(request):
-    """
-    Vista para listar campañas. La función de servicio retorna un diccionario o una lista.
-    En este ejemplo se retorna un JsonResponse.
-    """
-    resultados = listar_campanas_google()
-    if isinstance(resultados, dict) and resultados.get("error"):
-        return JsonResponse(resultados, status=500)
-    return JsonResponse(resultados, safe=False)
-
-
-def listar_clientes_ads_view(request):
-    """
-    Vista para listar clientes (cuentas hijas) de Google Ads.
-    """
-    resultados = listar_clientes_ads()
-    if isinstance(resultados, dict) and resultados.get("error"):
-        return JsonResponse(resultados, status=500)
-    return JsonResponse(resultados, safe=False)
 
 @csrf_exempt
 def crear_campana_facebook(request):
+    """Procesa la creación de campañas en Facebook Ads"""
     if request.method == "POST":
         try:
-            response = crear_campana_facebook_ads(request)
-            if isinstance(response, JsonResponse):
-                errores = response.content.decode('utf-8')
+            respuesta = crear_campana_facebook_ads(request)
+            if isinstance(respuesta, JsonResponse):
+                errores = respuesta.content.decode('utf-8')
                 messages.error(request, f"Error al crear campaña Facebook: {errores}")
             else:
                 messages.success(request, "¡Campaña Facebook creada exitosamente!")
@@ -109,43 +95,14 @@ def crear_campana_facebook(request):
             return redirect('campannias:crear_facebook_view')
     return render(request, 'campannias/crearCampanaFacebook.html')
 
-def facebook_auth_start(request):
-    url, error = facebook_auth_url()
-    if error:
-        return JsonResponse({"error": error}, status=500)
-    return redirect(url)
-
-
-def facebook_callback(request):
-    tokens, error_response = facebook_callback_logic(request)
-    if error_response:
-        return error_response
-
-    # Guarda el token en la base de datos
-    # Asegúrate de haber definido el modelo CredencialAPI_facebook correctamente.
-    from campannias.models import CredencialAPI_facebook  # Importa aquí para evitar problemas de import circular
-    CredencialAPI_facebook.objects.create(
-        access_token=tokens.get("access_token"),
-        token_type="bearer",
-        expires_in=tokens.get("expires_in"),
-        scope="ads_management,business_management"
-    )
-    return JsonResponse({"mensaje": "Token de Facebook guardado correctamente"})
-
-
-def listar_cuentas_facebook(request):
-    resultado = listar_cuentas_facebook_service()
-    if isinstance(resultado, dict) and resultado.get("error"):
-        return JsonResponse(resultado, status=400)
-    return JsonResponse(resultado, safe=False)
-
-
+@csrf_exempt
 def crear_campana_instagram(request):
+    """Procesa la creación de campañas en Instagram Ads"""
     if request.method == "POST":
         try:
-            response = crear_campana_instagram_ads(request)  # Función a implementar en ads_instagram.py (placeholder)
-            if isinstance(response, JsonResponse):
-                errores = response.content.decode('utf-8')
+            respuesta = crear_campana_instagram_ads(request)
+            if isinstance(respuesta, JsonResponse):
+                errores = respuesta.content.decode('utf-8')
                 messages.error(request, f"Error al crear campaña Instagram: {errores}")
             else:
                 messages.success(request, "¡Campaña Instagram creada exitosamente!")
@@ -155,77 +112,177 @@ def crear_campana_instagram(request):
             return redirect('campannias:crear_instagram_view')
     return render(request, 'campannias/crearCampanaInstagram.html')
 
-
 ##########################
-### OTRAS VISTAS (Google OAuth, token refresh, listados, etc.)
+### VISTAS PARA AUTENTICACIÓN
 ##########################
 
 def google_auth_start(request):
-    base_url = "https://accounts.google.com/o/oauth2/v2/auth"
-    params = {
-        "client_id": os.environ["GOOGLE_CLIENT_ID"],
-        "redirect_uri": os.environ["GOOGLE_OAUTH_REDIRECT_URI"],
-        "response_type": "code",
-        "scope": "https://www.googleapis.com/auth/adwords",
-        "access_type": "offline",
-        "prompt": "consent"
-    }
-    url = f"{base_url}?{urlencode(params)}"
+    """Inicia el proceso de autenticación con Google"""
+    url = google_auth_url()
     return redirect(url)
 
-def oauth2callback(request):
+def google_auth_callback(request):
+    """Procesa el callback de autenticación de Google"""
     code = request.GET.get('code')
     if not code:
         return JsonResponse({"error": "No code in request"}, status=400)
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "code": code,
-        "client_id": os.environ["GOOGLE_CLIENT_ID"],
-        "client_secret": os.environ["GOOGLE_CLIENT_SECRET"],
-        "redirect_uri": os.environ["GOOGLE_OAUTH_REDIRECT_URI"],
-        "grant_type": "authorization_code",
-    }
-    response = requests.post(token_url, data=data)
-    if response.status_code != 200:
-        return JsonResponse({"error": "Failed to get token", "details": response.json()}, status=500)
-    tokens = response.json()
-    # Guardamos el token en la base de datos
-    CredencialAPI_google.objects.create(
-        refresh_token=tokens.get("refresh_token"),
-        access_token=tokens.get("access_token"),
-        expires_in=tokens.get("expires_in"),
-        token_type=tokens.get("token_type"),
-        scope=tokens.get("scope")
-    )
+    
+    tokens = google_auth_callback(code)
     return JsonResponse({"mensaje": "Tokens guardados correctamente"})
 
-def refrescar_token(request):
-    try:
-        cred = CredencialAPI_google.objects.latest('creado')
-        refresh_token = cred.refresh_token
-    except CredencialAPI_google.DoesNotExist:
-        return JsonResponse({"error": "No hay refresh_token guardado"}, status=404)
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "client_id": os.environ["GOOGLE_CLIENT_ID"],
-        "client_secret": os.environ["GOOGLE_CLIENT_SECRET"],
-        "refresh_token": refresh_token,
-        "grant_type": "refresh_token"
+def facebook_auth_start(request):
+    """Inicia el proceso de autenticación con Facebook"""
+    url, error = facebook_auth_url()
+    if error:
+        return JsonResponse({"error": error}, status=500)
+    return redirect(url)
+
+def facebook_auth_callback(request):
+    """Procesa el callback de autenticación de Facebook"""
+    tokens, error_response = facebook_callback_logic(request)
+    if error_response:
+        return error_response
+    return JsonResponse({"mensaje": "Token de Facebook guardado correctamente"})
+
+##########################
+### VISTAS PARA LISTADOS Y MÉTRICAS
+##########################
+
+def listar_campanas_google_view(request):
+    """Lista las campañas de Google Ads"""
+    resultados = google_listar_campanas()
+    if isinstance(resultados, dict) and resultados.get("error"):
+        return JsonResponse(resultados, status=500)
+    return JsonResponse(resultados, safe=False)
+
+def listar_clientes_ads_view(request):
+    """Lista los clientes de Google Ads"""
+    resultados = google_listar_clientes()
+    if isinstance(resultados, dict) and resultados.get("error"):
+        return JsonResponse(resultados, status=500)
+    return JsonResponse(resultados, safe=False)
+
+def listar_cuentas_facebook(request):
+    """Lista las cuentas de Facebook Ads"""
+    resultado = listar_cuentas_facebook_service()
+    if isinstance(resultado, dict) and resultado.get("error"):
+        return JsonResponse(resultado, status=400)
+    return JsonResponse(resultado, safe=False)
+
+@login_required
+def preview_anuncio(request, pk):
+    """Muestra la vista previa de un anuncio según la plataforma"""
+    campania = get_object_or_404(CampaniaGoogle, pk=pk)
+    plataforma = request.GET.get('plataforma', 'google')
+    
+    if plataforma == 'google':
+        preview_data = preview_anuncio_google(campania)
+    elif plataforma == 'facebook':
+        preview_data = preview_anuncio_facebook(campania)
+    elif plataforma == 'instagram':
+        preview_data = preview_anuncio_instagram(campania)
+    else:
+        return JsonResponse({'error': 'Plataforma no válida'}, status=400)
+    
+    return JsonResponse(preview_data)
+
+@login_required
+def obtener_metricas(request, pk):
+    """Obtiene las métricas de una campaña según la plataforma"""
+    campania = get_object_or_404(CampaniaGoogle, pk=pk)
+    plataforma = request.GET.get('plataforma', 'google')
+    
+    if plataforma == 'google':
+        metricas = obtener_metricas_google(campania)
+    elif plataforma == 'facebook':
+        metricas = obtener_metricas_facebook(campania)
+    elif plataforma == 'instagram':
+        metricas = obtener_metricas_instagram(campania)
+    else:
+        return JsonResponse({'error': 'Plataforma no válida'}, status=400)
+    
+    return JsonResponse(metricas)
+
+def listar_campanias(request):
+    from .models import CampaniaGoogle
+    campanias = CampaniaGoogle.objects.all()
+    return render(request, 'campannias/lista_campanias.html', {'campanias': campanias})
+
+def seleccionar_redes(request):
+    if request.method == 'POST':
+        redes = request.POST.getlist('redes')
+        if not redes:
+            messages.error(request, 'Debes seleccionar al menos una red social.')
+            return redirect('campannias:index')
+        request.session['redes_seleccionadas'] = redes
+        return redirect('campannias:crear_campania_dinamica')
+    return redirect('campannias:index')
+
+def crear_campania_dinamica(request):
+    redes = request.session.get('redes_seleccionadas', [])
+    datos_campania = request.session.get('datos_campania', {})
+    paso = int(request.GET.get('paso', 0))
+
+    # Si el usuario quiere reiniciar el flujo
+    if request.GET.get('reset') == '1':
+        request.session.pop('datos_campania', None)
+        request.session.pop('redes_seleccionadas', None)
+        request.session.pop('datos_comunes', None)
+        return redirect('campannias:index')
+
+    # Si no hay redes seleccionadas, volver al inicio
+    if not redes:
+        return redirect('campannias:index')
+
+    # Si se envió el formulario de la red actual, guardar los datos
+    if request.method == 'POST':
+        reutilizar = request.POST.get('reutilizar_datos') == 'on'
+        campos_comunes = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'presupuesto', 'presupuesto_diario']
+        datos_comunes = {k: request.POST.get(k, '') for k in campos_comunes}
+        if reutilizar:
+            request.session['datos_comunes'] = datos_comunes
+        else:
+            request.session['datos_comunes'] = {}
+        datos_red = {k: v for k, v in request.POST.items() if k != 'csrfmiddlewaretoken' and k != 'reutilizar_datos'}
+        request.session['datos_campania'] = datos_red
+        # Si hay más redes, pasar al siguiente paso
+        if paso + 1 < len(redes):
+            return redirect(f"{request.path}?paso={paso+1}")
+        # Si ya terminó, limpiar sesión y mostrar mensaje de éxito
+        request.session.pop('redes_seleccionadas', None)
+        request.session.pop('datos_campania', None)
+        request.session.pop('datos_comunes', None)
+        return render(request, 'campannias/crear_campania_dinamica.html', {'finalizado': True, 'mensaje': '¡Campañas creadas exitosamente!'})
+
+    # Mostrar el formulario correspondiente a la red actual
+    red_actual = redes[paso]
+    template_map = {
+        'facebook': 'campannias/crearCampanaFacebook.html',
+        'instagram': 'campannias/crearCampanaInstagram.html',
+        'google': 'campannias/crearCampanaGoogle.html',
     }
-    response = requests.post(token_url, data=data)
-    if response.status_code != 200:
-        return JsonResponse({
-            "error": "Error al refrescar token",
-            "response": response.json()
-        }, status=500)
-    nuevo_token = response.json()
-    cred.access_token = nuevo_token.get("access_token")
-    cred.expires_in = nuevo_token.get("expires_in")
-    cred.token_type = nuevo_token.get("token_type")
-    cred.save()
-    return JsonResponse({
-        "mensaje": "Token actualizado correctamente",
-        "access_token": cred.access_token
+    form_map = {
+        'facebook': CampaniaFacebookForm,
+        'instagram': CampaniaInstagramForm,
+        'google': CampaniaGoogleForm,
+    }
+    template = template_map.get(red_actual)
+    form_class = form_map.get(red_actual)
+    if not template or not form_class:
+        return render(request, 'campannias/crear_campania_dinamica.html', {'error': 'Red social no soportada.'})
+
+    datos_comunes = request.session.get('datos_comunes', {})
+    form = form_class(initial=datos_comunes)
+
+    return render(request, template, {
+        'paso': paso,
+        'total': len(redes),
+        'red_actual': red_actual,
+        'redes': redes,
+        'datos_campania': datos_campania,
+        'datos_comunes': datos_comunes,
+        'form': form,
+        'activar_desactivar_url': f"{request.path}?reset=1"
     })
 
 

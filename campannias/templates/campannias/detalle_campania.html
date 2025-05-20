@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Información de la Campaña -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">{{ campania.nombre }}</h2>
+                    <span class="badge bg-{{ campania.estado|yesno:'success,warning,danger,secondary' }}">
+                        {{ campania.get_estado_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ campania.descripcion }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Fecha de inicio:</strong> {{ campania.fecha_inicio|date:"d/m/Y" }}</p>
+                            <p><strong>Fecha de fin:</strong> {{ campania.fecha_fin|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Presupuesto:</strong> ${{ campania.presupuesto }}</p>
+                            <p><strong>Creada:</strong> {{ campania.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segmentación -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Segmentación</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            {{ field.errors }}
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary">Guardar Segmentación</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Vista Previa de Anuncios -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Vista Previa de Anuncios</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="mostrarPreview('google')">
+                                Google Ads
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="mostrarPreview('facebook')">
+                                Facebook Ads
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="mostrarPreview('instagram')">
+                                Instagram Ads
+                            </button>
+                        </div>
+                    </div>
+                    <div id="preview-container" class="mt-3">
+                        <!-- Aquí se mostrará la vista previa -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones y Resultados -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Acciones</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'campannias:cambiar_estado_campania' campania.pk %}" class="mb-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Cambiar Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                {% for value, label in campania.ESTADOS %}
+                                <option value="{{ value }}" {% if value == campania.estado %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Actualizar Estado</button>
+                    </form>
+                    <a href="{% url 'campannias:simular_resultados' campania.pk %}" class="btn btn-success w-100">
+                        Simular Resultados
+                    </a>
+                </div>
+            </div>
+
+            <!-- Métricas por Plataforma -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Métricas por Plataforma</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Google Ads -->
+                    <h5 class="mb-3">Google Ads</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Impresiones</td>
+                                <td>{{ metricas_google.impresiones }}</td>
+                            </tr>
+                            <tr>
+                                <td>Clics</td>
+                                <td>{{ metricas_google.clics }}</td>
+                            </tr>
+                            <tr>
+                                <td>CTR</td>
+                                <td>{{ metricas_google.ctr }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Costo</td>
+                                <td>${{ metricas_google.costo_total|floatformat:2 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Facebook Ads -->
+                    <h5 class="mb-3">Facebook Ads</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Alcance</td>
+                                <td>{{ metricas_facebook.alcance }}</td>
+                            </tr>
+                            <tr>
+                                <td>Impresiones</td>
+                                <td>{{ metricas_facebook.impresiones }}</td>
+                            </tr>
+                            <tr>
+                                <td>Clics</td>
+                                <td>{{ metricas_facebook.clics }}</td>
+                            </tr>
+                            <tr>
+                                <td>Costo</td>
+                                <td>${{ metricas_facebook.costo_total|floatformat:2 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Instagram Ads -->
+                    <h5 class="mb-3">Instagram Ads</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Alcance</td>
+                                <td>{{ metricas_instagram.alcance }}</td>
+                            </tr>
+                            <tr>
+                                <td>Impresiones</td>
+                                <td>{{ metricas_instagram.impresiones }}</td>
+                            </tr>
+                            <tr>
+                                <td>Clics</td>
+                                <td>{{ metricas_instagram.clics }}</td>
+                            </tr>
+                            <tr>
+                                <td>Costo</td>
+                                <td>${{ metricas_instagram.costo_total|floatformat:2 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Agregar clases de Bootstrap a los campos del formulario
+    document.querySelectorAll('input, textarea, select').forEach(element => {
+        element.classList.add('form-control');
+    });
+
+    // Función para mostrar la vista previa de anuncios
+    function mostrarPreview(plataforma) {
+        const container = document.getElementById('preview-container');
+        container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+        
+        fetch(`{% url 'campannias:preview_anuncio' campania.pk %}?plataforma=${plataforma}`)
+            .then(response => response.json())
+            .then(data => {
+                let html = '<div class="card">';
+                html += '<div class="card-body">';
+                
+                if (plataforma === 'google') {
+                    html += mostrarPreviewGoogle(data);
+                } else if (plataforma === 'facebook') {
+                    html += mostrarPreviewFacebook(data);
+                } else if (plataforma === 'instagram') {
+                    html += mostrarPreviewInstagram(data);
+                }
+                
+                html += '</div></div>';
+                container.innerHTML = html;
+            })
+            .catch(error => {
+                container.innerHTML = '<div class="alert alert-danger">Error al cargar la vista previa</div>';
+            });
+    }
+
+    function mostrarPreviewGoogle(data) {
+        return `
+            <h5>Vista Previa - Google Ads</h5>
+            <div class="border p-3 mb-3">
+                <h6>${data.titulo}</h6>
+                <p>${data.descripcion}</p>
+                <small class="text-muted">${data.url_destino}</small>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Vista Móvil</h6>
+                    <div class="border p-2">
+                        <p>${data.preview_movil.titulo}</p>
+                        <small>${data.preview_movil.descripcion}</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6>Vista Escritorio</h6>
+                    <div class="border p-2">
+                        <p>${data.preview_escritorio.titulo}</p>
+                        <small>${data.preview_escritorio.descripcion}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function mostrarPreviewFacebook(data) {
+        let html = `
+            <h5>Vista Previa - Facebook Ads</h5>
+            <div class="border p-3 mb-3">
+                <h6>${data.titulo}</h6>
+                <p>${data.texto}</p>
+                <small class="text-muted">${data.url_destino}</small>
+            </div>
+        `;
+        
+        if (data.formato === 'Carrusel') {
+            html += '<div class="row">';
+            data.elementos_carrusel.forEach(elemento => {
+                html += `
+                    <div class="col-md-4">
+                        <div class="border p-2">
+                            <h6>${elemento.titulo}</h6>
+                            <p>${elemento.descripcion}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else if (data.formato === 'Video') {
+            html += `<p><strong>Duración:</strong> ${data.duracion_video}</p>`;
+        }
+        
+        return html;
+    }
+
+    function mostrarPreviewInstagram(data) {
+        let html = `
+            <h5>Vista Previa - Instagram Ads</h5>
+            <div class="border p-3 mb-3">
+                <h6>${data.titulo}</h6>
+                <p>${data.texto}</p>
+                <small class="text-muted">${data.url_destino}</small>
+            </div>
+        `;
+        
+        if (data.formato === 'Carrusel') {
+            html += '<div class="row">';
+            data.elementos_carrusel.forEach(elemento => {
+                html += `
+                    <div class="col-md-4">
+                        <div class="border p-2">
+                            <h6>${elemento.titulo}</h6>
+                            <p>${elemento.descripcion}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else if (data.formato === 'Video') {
+            html += `<p><strong>Duración:</strong> ${data.duracion_video}</p>`;
+        } else if (data.formato === 'Reels') {
+            html += `
+                <div class="border p-2">
+                    <p><strong>Duración:</strong> ${data.duracion_reel}</p>
+                    <p><strong>Música:</strong> ${data.musica}</p>
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+</script>
+{% endblock %} 

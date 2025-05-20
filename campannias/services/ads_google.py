@@ -11,10 +11,57 @@ from django.http import JsonResponse
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
 
-# Cargar la configuración de Google Ads desde el archivo yaml
-YAML_PATH = Path(__file__).resolve().parent.parent.parent / "google-ads.yaml"
-CLIENT = GoogleAdsClient.load_from_storage(str(YAML_PATH))
+from datetime import datetime, timedelta
+import random
+import json
+import time
+from django.conf import settings
 
+# Configuración de credenciales simuladas
+MOCK_CREDENTIALS = {
+    "developer_token": "mock_developer_token",
+    "client_id": "mock_client_id",
+    "client_secret": "mock_client_secret",
+    "refresh_token": "mock_refresh_token",
+    "access_token": "mock_access_token",
+    "token_expiry": (datetime.now() + timedelta(hours=1)).isoformat()
+}
+
+# Clientes simulados
+MOCK_CLIENTS = [
+    {
+        "id": "123456789",
+        "name": "Cliente Ejemplo 1",
+        "currency_code": "MXN",
+        "time_zone": "America/Mexico_City"
+    },
+    {
+        "id": "987654321",
+        "name": "Cliente Ejemplo 2",
+        "currency_code": "MXN",
+        "time_zone": "America/Mexico_City"
+    }
+]
+
+# Campañas simuladas
+MOCK_CAMPAIGNS = [
+    {
+        "id": "111111111",
+        "name": "Campaña de Prueba 1",
+        "status": "ENABLED",
+        "budget": 100.00,
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31"
+    },
+    {
+        "id": "222222222",
+        "name": "Campaña de Prueba 2",
+        "status": "ENABLED",
+        "budget": 200.00,
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31"
+    }
+]
 
 def validar_imagen(django_file, tipo="cuadrada"):
     """
@@ -31,169 +78,132 @@ def validar_imagen(django_file, tipo="cuadrada"):
     return True, ""
 
 
+class GoogleAdsSimulator:
+    def __init__(self):
+        self.formatos_anuncio = [
+            "Texto",
+            "Imagen",
+            "Video",
+            "Responsive",
+            "Shopping"
+        ]
+        
+        self.ubicaciones = [
+            "Búsqueda de Google",
+            "Sitios web asociados",
+            "YouTube",
+            "Gmail"
+        ]
+
+    def simular_creacion_campana(self, datos_campana):
+        """
+        Simula la creación de una campaña en Google Ads
+        """
+        return {
+            "id_campana": f"g-{random.randint(100000, 999999)}",
+            "nombre": datos_campana.get("nombre", "Campaña Google"),
+            "estado": "ACTIVA",
+            "presupuesto_diario": datos_campana.get("presupuesto", 0) / 30,
+            "tipo_campana": random.choice(self.formatos_anuncio),
+            "ubicaciones": random.sample(self.ubicaciones, 2),
+            "fecha_creacion": datetime.now().isoformat(),
+            "metricas_simuladas": {
+                "impresiones_estimadas": random.randint(5000, 20000),
+                "clics_estimados": random.randint(100, 1000),
+                "conversiones_estimadas": random.randint(10, 100),
+                "costo_estimado": round(random.uniform(50, 500), 2)
+            }
+        }
+
+    def simular_preview_anuncio(self, datos_anuncio):
+        """
+        Simula cómo se vería el anuncio en Google
+        """
+        return {
+            "titulo": datos_anuncio.get("titulo", "Título del Anuncio"),
+            "descripcion": datos_anuncio.get("descripcion", "Descripción del anuncio..."),
+            "url_destino": datos_anuncio.get("url", "https://ejemplo.com"),
+            "formato": random.choice(self.formatos_anuncio),
+            "preview_movil": {
+                "titulo": "Cómo se ve en móvil",
+                "descripcion": "Vista previa en dispositivos móviles"
+            },
+            "preview_escritorio": {
+                "titulo": "Cómo se ve en escritorio",
+                "descripcion": "Vista previa en navegadores de escritorio"
+            }
+        }
+
+    def simular_metricas(self, id_campana):
+        """
+        Simula las métricas de rendimiento de una campaña
+        """
+        return {
+            "impresiones": random.randint(1000, 5000),
+            "clics": random.randint(50, 200),
+            "ctr": round(random.uniform(1, 5), 2),
+            "conversiones": random.randint(5, 20),
+            "costo_total": round(random.uniform(100, 500), 2),
+            "cpa": round(random.uniform(5, 25), 2),
+            "roas": round(random.uniform(1, 5), 2)
+        }
+
+def get_auth_url():
+    """Simula la URL de autenticación de Google Ads"""
+    return "https://accounts.google.com/o/oauth2/auth?mock=true"
+
+def handle_auth_callback(code):
+    """Simula el manejo del callback de autenticación"""
+    return MOCK_CREDENTIALS
+
+def refresh_token():
+    """Simula la actualización del token"""
+    MOCK_CREDENTIALS["access_token"] = "new_mock_access_token"
+    MOCK_CREDENTIALS["token_expiry"] = (datetime.now() + timedelta(hours=1)).isoformat()
+    return MOCK_CREDENTIALS
+
+def listar_clientes_ads(customer_id=None):
+    """Simula la obtención de clientes de Google Ads"""
+    return MOCK_CLIENTS
+
+def listar_campanas_google(customer_id=None):
+    """Simula la obtención de campañas de Google Ads"""
+    return MOCK_CAMPAIGNS
+
 def crear_campana_google_ads(request):
-    """
-    Crea una campaña en Google Ads utilizando los datos enviados en el formulario.
-    Se encarga de:
-      - Validar y subir imágenes (assets)
-      - Crear presupuesto y campaña
-      - Configurar segmentación y grupo de anuncios
-      - Crear el anuncio responsivo
-    La función retorna un redirect a la página de inicio en caso de éxito o un JsonResponse con errores.
-    """
+    """Simula la creación de una campaña en Google Ads"""
     try:
-        # Obtener datos del formulario
-        nombre = request.POST.get("nombre_campana")
-        presupuesto_cop = int(request.POST.get("presupuesto_diario"))
-        fecha_inicio = request.POST.get("fecha_inicio")
-        fecha_fin = request.POST.get("fecha_fin", "")
-        tipo_red = request.POST.get("tipo_red")
-        estrategia_puja = request.POST.get("estrategia_puja")
-        titulo = request.POST.get("titulo_anuncio")
-        descripcion = request.POST.get("descripcion_anuncio")
-        url_destino = request.POST.get("url_destino")
-        imagen_cuadrada = request.FILES.get("imagen_cuadrada")
-        imagen_horizontal = request.FILES.get("imagen_horizontal")
-
-        # Validación de imágenes
-        valida1, error1 = validar_imagen(imagen_cuadrada, "cuadrada")
-        valida2, error2 = validar_imagen(imagen_horizontal, "horizontal")
-        if not valida1 or not valida2:
-            return JsonResponse({"error": error1 or error2}, status=400)
-
-        # Conversión de presupuesto (por ejemplo, de COP a micros)
-        presupuesto_micros = presupuesto_cop * 1_000_000
-
-        # Usa el customer_id que corresponda
-        customer_id = "2454952399"
-
-        # Crear presupuesto
-        budget_service = CLIENT.get_service("CampaignBudgetService")
-        budget_operation = CLIENT.get_type("CampaignBudgetOperation")
-        budget = budget_operation.create
-        budget.name = f"Presupuesto {nombre} - {uuid4().hex[:6]}"
-        budget.amount_micros = presupuesto_micros
-        budget.delivery_method = CLIENT.enums.BudgetDeliveryMethodEnum.STANDARD
-        budget_response = budget_service.mutate_campaign_budgets(
-            customer_id=customer_id, operations=[budget_operation]
-        )
-        budget_id = budget_response.results[0].resource_name
-
-        # Crear campaña
-        campaign_service = CLIENT.get_service("CampaignService")
-        campaign_operation = CLIENT.get_type("CampaignOperation")
-        campaign = campaign_operation.create
-        campaign.name = nombre
-        campaign.advertising_channel_type = (
-            CLIENT.enums.AdvertisingChannelTypeEnum.SEARCH
-            if tipo_red == "SEARCH" else CLIENT.enums.AdvertisingChannelTypeEnum.DISPLAY
-        )
-        campaign.status = CLIENT.enums.CampaignStatusEnum.PAUSED
-        campaign.campaign_budget = budget_id
-
-        # Estrategia de puja
-        if estrategia_puja == "MANUAL_CPC":
-            campaign.manual_cpc = CLIENT.get_type("ManualCpc")
-        elif estrategia_puja == "MAXIMIZE_CLICKS":
-            campaign.maximize_clicks = CLIENT.get_type("MaximizeClicks")
-
-        campaign.start_date = datetime.datetime.strptime(fecha_inicio, "%Y-%m-%d").strftime("%Y%m%d")
-        if fecha_fin:
-            campaign.end_date = datetime.datetime.strptime(fecha_fin, "%Y-%m-%d").strftime("%Y%m%d")
-
-        campaign_response = campaign_service.mutate_campaigns(
-            customer_id=customer_id, operations=[campaign_operation]
-        )
-        campaign_resource_name = campaign_response.results[0].resource_name
-
-        # Segmentación: se agrega idioma y ubicación
-        criterion_service = CLIENT.get_service("CampaignCriterionService")
-
-        # Idioma (ejemplo: languageConstants/1000)
-        lang = CLIENT.get_type("CampaignCriterion")()
-        lang.campaign = campaign_resource_name
-        lang.language.language_constant = "languageConstants/1000"
-        op_lang = CLIENT.get_type("CampaignCriterionOperation")()
-        op_lang.create = lang
-
-        # Ubicación (ejemplo: geoTargetConstants/2124)
-        loc = CLIENT.get_type("CampaignCriterion")()
-        loc.campaign = campaign_resource_name
-        loc.location.geo_target_constant = "geoTargetConstants/2124"
-        op_loc = CLIENT.get_type("CampaignCriterionOperation")()
-        op_loc.create = loc
-
-        criterion_service.mutate_campaign_criteria(
-            customer_id=customer_id,
-            operations=[op_lang, op_loc]
-        )
-
-        # Función para subir imágenes como assets
-        asset_service = CLIENT.get_service("AssetService")
-
-        def subir_asset_imagen(imagen, nombre_asset):
-            image_bytes = imagen.read()
-            asset_op = CLIENT.get_type("AssetOperation")
-            asset = asset_op.create
-            asset.name = nombre_asset
-            asset.type_ = CLIENT.enums.AssetTypeEnum.IMAGE
-            asset.image_asset.data = image_bytes
-            response_asset = asset_service.mutate_assets(customer_id=customer_id, operations=[asset_op])
-            return response_asset.results[0].resource_name
-
-        asset_cuadrado = subir_asset_imagen(imagen_cuadrada, f"{nombre}_cuadrada")
-        asset_horizontal = subir_asset_imagen(imagen_horizontal, f"{nombre}_horizontal")
-
-        # Crear grupo de anuncios
-        ad_group_service = CLIENT.get_service("AdGroupService")
-        ad_group_op = CLIENT.get_type("AdGroupOperation")
-        ad_group = ad_group_op.create
-        ad_group.name = f"Grupo {nombre}"
-        ad_group.campaign = campaign_resource_name
-        ad_group.status = CLIENT.enums.AdGroupStatusEnum.ENABLED
-        ad_group.type_ = CLIENT.enums.AdGroupTypeEnum.SEARCH_STANDARD
-        ad_group_resp = ad_group_service.mutate_ad_groups(
-            customer_id=customer_id, operations=[ad_group_op]
-        )
-        ad_group_resource = ad_group_resp.results[0].resource_name
-
-        # Crear el anuncio
-        ad_group_ad_service = CLIENT.get_service("AdGroupAdService")
-        ad_op = CLIENT.get_type("AdGroupAdOperation")
-        ad = ad_op.create
-        ad.ad_group = ad_group_resource
-        ad.status = CLIENT.enums.AdGroupAdStatusEnum.PAUSED
-        ad.ad.final_urls.append(url_destino)
-
-        rsa = ad.ad.responsive_display_ad
-        rsa.headlines.add().text = titulo
-        rsa.descriptions.add().text = descripcion
-        rsa.marketing_images.add().asset = asset_horizontal
-        rsa.square_marketing_images.add().asset = asset_cuadrado
-
-        ad_group_ad_service.mutate_ad_group_ads(
-            customer_id=customer_id, operations=[ad_op]
-        )
-
-        # Retornamos el éxito; en un flujo real se podría retornar un diccionario o similar
-        return {"status": "success", "mensaje": "Campaña creada correctamente"}
-
-    except GoogleAdsException as ex:
-        error_messages = []
-        for error in ex.failure.errors:
-            error_messages.append({
-                "mensaje": error.message,
-                "campo": [f.field_name for f in error.location.field_path_elements] if error.location else "N/A",
-                "código": error.error_code.__class__.__name__
-            })
-        return JsonResponse({
-            "error": "Error de la API de Google Ads",
-            "detalles": error_messages
-        }, status=400)
-
+        data = json.loads(request.body)
+        nueva_campana = {
+            "id": str(len(MOCK_CAMPAIGNS) + 1),
+            "name": data.get("nombre"),
+            "status": "ENABLED",
+            "budget": float(data.get("presupuesto_diario", 0)),
+            "start_date": data.get("fecha_inicio"),
+            "end_date": data.get("fecha_fin")
+        }
+        MOCK_CAMPAIGNS.append(nueva_campana)
+        return nueva_campana
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return {"error": str(e)}
 
+def preview_anuncio_google(campania):
+    """Simula la vista previa de un anuncio"""
+    return {
+        "titulo": f"Vista previa de {campania.nombre}",
+        "descripcion": "Esta es una vista previa simulada",
+        "url_destino": "https://ejemplo.com",
+        "imagen": "https://via.placeholder.com/300x200"
+    }
+
+def obtener_metricas_google(campania):
+    """Simula la obtención de métricas de una campaña"""
+    return {
+        "impresiones": random.randint(1000, 10000),
+        "clicks": random.randint(100, 1000),
+        "costo": round(random.uniform(100, 1000), 2),
+        "conversiones": random.randint(10, 100)
+    }
 
 def listar_campanas_google(customer_id="2454952399"):
     """

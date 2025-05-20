@@ -1,201 +1,162 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crear Campaña - ÉLAN AUTOMATE</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#1D4ED8',
-            secondary: '#059669',
-          },
-          fontFamily: {
-            sans: ['Poppins', 'sans-serif'],
-          },
-        }
-      }
-    }
-  </script>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-r from-blue-200 to-green-200 font-sans">
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
 
-  <!-- Encabezado -->
-  <header class="flex items-center justify-between bg-white px-6 py-4 shadow">
-    <a href="{% url 'home' %}" class="text-2xl font-bold">
-      <span class="text-green-600">ÉLAN</span>
-      <span class="text-sky-600">AUTOMATE</span>
-    </a>
-    {% if messages %}
-      <div class="absolute top-16 inset-x-0 max-w-lg mx-auto">
-        {% for message in messages %}
-          <div class="p-4 rounded text-white text-center mb-2 
-                      {% if message.tags == 'success' %} bg-green-500 
-                      {% else %} bg-red-500 {% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <!-- Sección de autenticación -->
-    {% if user.is_authenticated %}
-      <div class="flex items-center space-x-4">
-        <span class="text-gray-700">Bienvenido, {{ user.username }}</span>
-        <a href="{% url 'accounts:logout' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">
-          Cerrar Sesión
-        </a>
-      </div>
-    {% else %}
-      <div class="flex items-center space-x-4">
-        <a href="{% url 'accounts:login' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">Iniciar Sesión</a>
-        <a href="{% url 'accounts:register' %}" class="bg-primary text-white py-2 px-4 rounded hover:bg-secondary">Registrarse</a>
-      </div>
-    {% endif %}
-  </header>
-
-  <!-- Formulario principal -->
-  <main class="flex-1 flex items-center justify-center">
-    <div class="w-full max-w-4xl p-6">
-
-      <form method="post" action="{% url 'campannias:crear_google' %}" enctype="multipart/form-data" class="bg-white p-8 rounded-lg shadow-lg mt-6">
-        {% csrf_token %}
-        <h2 class="text-3xl font-bold mb-8 text-center text-primary">Crear Nueva Campaña</h2>
-        
-        <!-- Datos generales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Nombre de la campaña</label>
-            <input name="nombre_campana" required type="text" placeholder="Ej. Campaña Primavera" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Presupuesto diario (COP)</label>
-            <input name="presupuesto_diario" required type="number" min="1000" placeholder="Ej. 10000" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-            <small class="text-sm text-gray-500">Se convertirá a micros (1 COP = 1,000,000 micros)</small>
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Fecha de inicio</label>
-            <input name="fecha_inicio" required type="date" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Fecha de finalización (opcional)</label>
-            <input name="fecha_fin" type="date" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-        </div>
-        
-        <!-- Configuración de campaña -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Tipo de red</label>
-            <select name="tipo_red" required 
-                    class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-              <option value="SEARCH">Red de Búsqueda</option>
-              <option value="DISPLAY">Red de Display</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Estrategia de puja</label>
-            <select name="estrategia_puja" required 
-                    class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-              <option value="MANUAL_CPC">CPC Manual</option>
-              <option value="MAXIMIZE_CLICKS">Maximizar Clics</option>
-              <!-- Puedes agregar más opciones según la API -->
-            </select>
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Segmentación Geográfica</label>
-            <input name="segmentacion_geo" type="text" value="Colombia" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">Idioma</label>
-            <input name="idioma" type="text" value="Español" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-          </div>
-        </div>
-        
-        <!-- Datos del anuncio -->
-        <div class="mt-8">
-          <h3 class="text-2xl font-semibold text-primary mb-4">Datos del Anuncio</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">
-                Título Corto <span class="text-sm text-gray-500">(max. 30 caracteres)</span>
-              </label>
-              <input name="titulo_anuncio" required type="text" maxlength="30" placeholder="Ej. Oferta Especial" 
-                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">
-                Título Largo <span class="text-sm text-gray-500">(max. 90 caracteres)</span>
-              </label>
-              <input name="titulo_largo" type="text" maxlength="90" 
-                     placeholder="Ej. Aprovecha nuestra oferta de primavera en productos seleccionados" 
-                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-          </div>
-          <div class="mt-4">
-            <label class="block text-gray-700 font-medium mb-2">
-              Descripción del Anuncio <span class="text-sm text-gray-500">(max. 90 caracteres)</span>
-            </label>
-            <textarea name="descripcion_anuncio" required maxlength="90" 
-                      placeholder="Ej. Descuentos increíbles por tiempo limitado" 
-                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
-          </div>
-        </div>
-        
-        <!-- Archivos (Imágenes) -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">
-              Imagen Cuadrada (1:1)
-            </label>
-            <input name="imagen_cuadrada" required type="file" accept="image/*" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-            <small class="text-sm text-gray-500 block">
-              Mínimo 300x300 píxeles, recomendado 1200x1200 píxeles.
-            </small>
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">
-              Imagen Horizontal (1.91:1)
-            </label>
-            <input name="imagen_horizontal" required type="file" accept="image/*" 
-                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-            <small class="text-sm text-gray-500 block">
-              Mínimo 600x314 píxeles, recomendado 1200x628 píxeles.
-            </small>
-          </div>
-        </div>
-        
-        <!-- URL de destino -->
-        <div class="mt-8">
-          <label class="block text-gray-700 font-medium mb-2">URL de Destino</label>
-          <input name="url_destino" required type="url" placeholder="https://www.ejemplo.com" 
-                 class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-        </div>
-        
-        <!-- Botón de envío -->
-        <div class="mt-10 text-center">
-          <button type="submit" 
-                  class="bg-primary hover:bg-secondary transition duration-300 text-white px-8 py-3 rounded-full text-xl font-semibold">
-            Crear Campaña
-          </button>
-        </div>
-      </form>
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-6 text-center">
+        <h2 class="text-3xl font-bold text-primary">Configurando campaña para <span class="text-secondary">Google Ads</span></h2>
+        <p class="text-gray-600 mt-2">Completa los campos requeridos para tu campaña en Google Ads.</p>
     </div>
-  </main>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{{ request.path }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">{{ form.nombre.label }}</label>
+                        {{ form.nombre|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                        {{ form.nombre.errors }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">{{ form.presupuesto_diario.label }}</label>
+                        {{ form.presupuesto_diario|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                        {{ form.presupuesto_diario.errors }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_inicio.label }}</label>
+                        {{ form.fecha_inicio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                        {{ form.fecha_inicio.errors }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_fin.label }}</label>
+                        {{ form.fecha_fin|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                        {{ form.fecha_fin.errors }}
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.tipo_campana.label }}</label>
+                    {{ form.tipo_campana|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.tipo_campana.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.red_anuncios.label }}</label>
+                    {{ form.red_anuncios|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.red_anuncios.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.palabras_clave.label }}</label>
+                    {{ form.palabras_clave|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.palabras_clave.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.puja_maxima.label }}</label>
+                    {{ form.puja_maxima|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.puja_maxima.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.edad_min.label }}</label>
+                    {{ form.edad_min|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.edad_min.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.edad_max.label }}</label>
+                    {{ form.edad_max|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.edad_max.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.genero.label }}</label>
+                    {{ form.genero|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.genero.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion.label }}</label>
+                    {{ form.ubicacion|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.ubicacion.errors }}
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">{{ form.intereses.label }}</label>
+                    {{ form.intereses|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
+                    {{ form.intereses.errors }}
+                </div>
+                <div class="flex items-center my-4">
+                    <label for="reutilizar_datos" class="mr-2 font-semibold">Guardar datos para la siguiente red</label>
+                    <label class="switch">
+                      <input type="checkbox" id="reutilizar_datos" name="reutilizar_datos" checked>
+                      <span class="slider round"></span>
+                    </label>
+                </div>
+                <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-secondary transition duration-300">Guardar y continuar</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-  <!-- Footer opcional -->
-  <footer class="bg-white p-4 text-center text-gray-500">
-    © {{ now|date:"Y" }} ÉLAN AUTOMATE. Todos los derechos reservados.
-  </footer>
-</body>
-</html>
+{% block extra_js %}
+<script>
+    // Validación de fechas
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInicio = document.getElementById('fecha_inicio');
+        const fechaFin = document.getElementById('fecha_fin');
+        
+        // Establecer fecha mínima como hoy
+        const hoy = new Date().toISOString().split('T')[0];
+        fechaInicio.min = hoy;
+        
+        fechaInicio.addEventListener('change', function() {
+            fechaFin.min = this.value;
+        });
+        
+        fechaFin.addEventListener('change', function() {
+            if (this.value < fechaInicio.value) {
+                this.value = fechaInicio.value;
+            }
+        });
+    });
+</script>
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #1D4ED8;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+</style>
+{% endblock %}
+
+{% endblock %}

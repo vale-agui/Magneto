@@ -4,22 +4,32 @@ from . import views
 app_name = 'campannias'
 
 urlpatterns = [
+    # Vistas principales
     path('', views.index, name='index'),
-    # Rutas de Google (se mantienen según lo configurado)
-    path('google-auth/', views.google_auth_start, name='google_auth_start'),
-    path('oauth2callback/', views.oauth2callback, name='oauth2callback'),
-    path('refrescar-token/', views.refrescar_token),
-    path('listar-clientes-ads/', views.listar_clientes_ads_view, name='listar_clientes_ads'),
-    path("listar-campanas/", views.listar_campanas_google_view, name='listar_campanas'),
-    path('crear-google-form/', views.crear_google_view, name='crear_google_view'),
-    path('crear-google/', views.crear_campana_google, name='crear_google'),
-    # Rutas de Facebook
-    path('crear-facebook-form/', views.crear_facebook_view, name='crear_facebook_view'),
-    path('crear-facebook/', views.crear_campana_facebook, name='crear_facebook'),
-    path('facebook-auth/', views.facebook_auth_start, name='facebook_auth_start'),
-    path('facebook-callback/', views.facebook_callback, name='facebook_callback'),
-    path('listar-cuentas-facebook/', views.listar_cuentas_facebook, name='listar_cuentas_facebook'),
-    # Rutas de Instagram (si aplica)
-    path('crear-instagram-form/', views.crear_instagram_view, name='crear_instagram_view'),
-    path('crear-instagram/', views.crear_campana_instagram, name='crear_instagram'),
+    
+    # Vistas de creación de campañas
+    path('crear/google/', views.crear_google_view, name='crear_google_view'),
+    path('crear/facebook/', views.crear_facebook_view, name='crear_facebook_view'),
+    path('crear/instagram/', views.crear_instagram_view, name='crear_instagram_view'),
+    
+    # Endpoints para procesar campañas
+    path('api/crear/google/', views.crear_campana_google, name='crear_campana_google'),
+    path('api/crear/facebook/', views.crear_campana_facebook, name='crear_campana_facebook'),
+    path('api/crear/instagram/', views.crear_campana_instagram, name='crear_campana_instagram'),
+    
+    # Endpoints de autenticación
+    path('auth/google/start/', views.google_auth_start, name='google_auth_start'),
+    path('auth/google/callback/', views.google_auth_callback, name='google_auth_callback'),
+    path('auth/facebook/start/', views.facebook_auth_start, name='facebook_auth_start'),
+    path('auth/facebook/callback/', views.facebook_auth_callback, name='facebook_auth_callback'),
+    
+    # Endpoints de listados y métricas
+    path('api/listar/google/campanas/', views.listar_campanas_google_view, name='listar_campanas_google'),
+    path('api/listar/google/clientes/', views.listar_clientes_ads_view, name='listar_clientes_ads'),
+    path('api/listar/facebook/cuentas/', views.listar_cuentas_facebook, name='listar_cuentas_facebook'),
+    path('api/preview/<int:pk>/', views.preview_anuncio, name='preview_anuncio'),
+    path('api/metricas/<int:pk>/', views.obtener_metricas, name='obtener_metricas'),
+    path('listar/', views.listar_campanias, name='listar_campanias'),
+    path('seleccionar-redes/', views.seleccionar_redes, name='seleccionar_redes'),
+    path('crear-campania-dinamica/', views.crear_campania_dinamica, name='crear_campania_dinamica'),
 ]
