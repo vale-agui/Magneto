@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from .models import CampanaFacebook, CampanaGoogle, ResultadoCampania, CampaniaFacebook, CampaniaInstagram, CampaniaGoogle
+from .models import CampaniaFacebook, CampaniaGoogle, CampaniaInstagram, ResultadoCampania
 from .forms import CampaniaFacebookForm, CampaniaInstagramForm, CampaniaGoogleForm
 import random
 from datetime import timedelta
@@ -77,7 +77,7 @@ def crear_campana_google(request):
                 return render(request, 'campannias/crearCampanaGoogle.html')
             
             # Crear nueva campaña
-            campana = CampanaGoogle(
+            campana = CampaniaGoogle(
                 # Campos de autenticación
                 customer_id=request.POST['customer_id'],
                 developer_token=request.POST['developer_token'],
@@ -90,7 +90,9 @@ def crear_campana_google(request):
                 tipo_campana=request.POST['tipo_campana'],
                 presupuesto_diario=float(request.POST['presupuesto_diario']),
                 fecha_inicio=request.POST['fecha_inicio'],
+                hora_inicio=request.POST['hora_inicio'],
                 fecha_fin=request.POST['fecha_fin'],
+                hora_fin=request.POST['hora_fin'],
                 
                 # Configuración de segmentación
                 palabras_clave=request.POST['palabras_clave'],
@@ -103,7 +105,7 @@ def crear_campana_google(request):
                 
                 # Estado y usuario
                 estado=request.POST.get('estado', 'PAUSED'),
-                usuario=request.user
+                creado_por=request.user
             )
             
             # Validar tokens de OAuth
@@ -132,11 +134,15 @@ def crear_campana_facebook(request):
     if request.method == 'POST':
         try:
             # Crear nueva campaña
-            campana = CampanaFacebook(
+            campana = CampaniaFacebook(
                 nombre=request.POST['name'],
                 campaign_id=request.POST['campaign_id'],
                 tipo_presupuesto=request.POST['budget_type'],
                 monto_presupuesto=float(request.POST['budget_amount']) / 100,  # Convertir centavos a dólares
+                fecha_inicio=request.POST['fecha_inicio'],
+                hora_inicio=request.POST['hora_inicio'],
+                fecha_fin=request.POST['fecha_fin'],
+                hora_fin=request.POST['hora_fin'],
                 evento_cobro=request.POST['billing_event'],
                 objetivo_optimizacion=request.POST['optimization_goal'],
                 edad_min=request.POST['age_min'],
@@ -145,7 +151,7 @@ def crear_campana_facebook(request):
                 ubicaciones=request.POST['locations'],
                 intereses=request.POST.get('interests', ''),
                 estado=request.POST['status'],
-                usuario=request.user
+                creado_por=request.user
             )
             campana.save()
             
@@ -167,13 +173,26 @@ def crear_campana_instagram(request):
     """Procesa la creación de campañas en Instagram Ads"""
     if request.method == "POST":
         try:
-            respuesta = crear_campana_instagram_ads(request)
-            if isinstance(respuesta, JsonResponse):
-                errores = respuesta.content.decode('utf-8')
-                messages.error(request, f"Error al crear campaña Instagram: {errores}")
-            else:
-                messages.success(request, "¡Campaña Instagram creada exitosamente!")
-            return redirect('campannias:crear_instagram_view')
+            # Crear nueva campaña
+            campana = CampaniaInstagram(
+                nombre=request.POST['nombre'],
+                objetivo=request.POST['objetivo'],
+                presupuesto=float(request.POST['presupuesto']),
+                fecha_inicio=request.POST['fecha_inicio'],
+                hora_inicio=request.POST['hora_inicio'],
+                fecha_fin=request.POST['fecha_fin'],
+                hora_fin=request.POST['hora_fin'],
+                audiencia=request.POST['audiencia'],
+                ubicaciones=request.POST['ubicaciones'],
+                intereses=request.POST.get('intereses', ''),
+                estado=request.POST.get('estado', 'ACTIVA'),
+                creado_por=request.user
+            )
+            campana.save()
+            
+            messages.success(request, "¡Campaña Instagram creada exitosamente!")
+            return redirect('campannias:listar_campanias')
+            
         except Exception as e:
             messages.error(request, f"Error inesperado: {str(e)}")
             return redirect('campannias:crear_instagram_view')
@@ -272,17 +291,22 @@ def obtener_metricas(request, pk):
 
 @login_required
 def listar_campanias(request):
-    # Obtener todas las campañas de cada red social
-    campanias_google = CampanaGoogle.objects.all().order_by('-fecha_creacion')
-    campanias_facebook = CampanaFacebook.objects.all().order_by('-fecha_creacion')
-    campanias_instagram = CampaniaInstagram.objects.all().order_by('-fecha_creacion')
-    
+    # Obtener parámetro de red desde la URL
+    red = request.GET.get('red')
+
+    # Obtener todas las campañas del usuario actual (ordenadas por fecha)
+    campanias_google = CampaniaGoogle.objects.filter(creado_por=request.user).order_by('-fecha_creacion')
+    campanias_facebook = CampaniaFacebook.objects.filter(creado_por=request.user).order_by('-fecha_creacion')
+    campanias_instagram = CampaniaInstagram.objects.filter(creado_por=request.user).order_by('-fecha_creacion')
+
+    # Pasar todas las campañas al template junto con la red seleccionada
     context = {
         'campanias_google': campanias_google,
         'campanias_facebook': campanias_facebook,
         'campanias_instagram': campanias_instagram,
+        'red': red
     }
-    
+
     return render(request, 'campannias/lista_campanias.html', context)
 
 def seleccionar_redes(request):
@@ -396,19 +420,48 @@ def costo_por_campania(request):
     
     return render(request, 'campannias/costo_por_campania.html', context)
 
+@login_required
 def reutilizar_campanias(request):
-    """Muestra las campañas que pueden ser reutilizadas"""
-    # Obtener campañas finalizadas o exitosas que pueden ser reutilizadas
-    campanias_google = CampaniaGoogle.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
-    campanias_facebook = CampaniaFacebook.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
-    campanias_instagram = CampaniaInstagram.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'])
-    
+    """Muestra las campañas que pueden ser reutilizadas por red"""
+    red = request.GET.get('red')
+
+    campanias_google = CampaniaGoogle.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'], creado_por=request.user)
+    campanias_facebook = CampaniaFacebook.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'], creado_por=request.user)
+    campanias_instagram = CampaniaInstagram.objects.filter(estado__in=['FINALIZADA', 'EXITOSA'], creado_por=request.user)
+
     context = {
         'campanias_google': campanias_google,
         'campanias_facebook': campanias_facebook,
-        'campanias_instagram': campanias_instagram
+        'campanias_instagram': campanias_instagram,
+        'red': red  # Pasamos el valor actual para resaltar el botón seleccionado
     }
-    
+
     return render(request, 'campannias/reutilizar_campanias.html', context)
+
+@login_required
+def detener_campania(request, pk, tipo):
+    """Detiene una campaña activa"""
+    try:
+        if tipo == 'google':
+            campania = get_object_or_404(CampaniaGoogle, pk=pk, creado_por=request.user)
+        elif tipo == 'facebook':
+            campania = get_object_or_404(CampaniaFacebook, pk=pk, creado_por=request.user)
+        elif tipo == 'instagram':
+            campania = get_object_or_404(CampaniaInstagram, pk=pk, creado_por=request.user)
+        else:
+            messages.error(request, 'Tipo de campaña no válido')
+            return redirect('campannias:listar_campanias')
+
+        if campania.estado == 'ACTIVA':
+            campania.estado = 'PAUSADA'
+            campania.save()
+            messages.success(request, f'Campaña {campania.nombre} detenida exitosamente')
+        else:
+            messages.warning(request, 'Solo se pueden detener campañas activas')
+
+    except Exception as e:
+        messages.error(request, f'Error al detener la campaña: {str(e)}')
+
+    return redirect('campannias:listar_campanias')
 
 

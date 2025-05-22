@@ -4,70 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}ÉLAN AUTOMATE{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
+
+    <!-- Tailwind CSS (para botones, diseño moderno y utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap CSS (por si usas componentes Bootstrap aún) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+
+    <!-- Google Fonts (opcional si usas Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
     <!-- Custom CSS -->
     <style>
         :root {
             --primary-color: #1D4ED8;
             --secondary-color: #059669;
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(to right, #e0f2fe, #dcfce7);
             min-height: 100vh;
         }
-        
+
         .navbar {
             background-color: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .navbar-brand {
             font-weight: bold;
         }
-        
+
         .navbar-brand span:first-child {
             color: var(--secondary-color);
         }
-        
+
         .navbar-brand span:last-child {
             color: var(--primary-color);
         }
-        
+
         .card {
             border: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             border-radius: 10px;
         }
-        
+
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
+
         .btn-primary:hover {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
         }
-        
+
         .btn-secondary {
             background-color: #6B7280;
             border-color: #6B7280;
         }
-        
+
         .alert {
             border-radius: 8px;
             border: none;
         }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -78,11 +84,11 @@
                 <span>ÉLAN</span>
                 <span>AUTOMATE</span>
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -98,7 +104,7 @@
                         <a class="nav-link" href="{% url 'campannias:crear_instagram_view' %}">Instagram Ads</a>
                     </li>
                 </ul>
-                
+
                 <div class="d-flex">
                     {% if user.is_authenticated %}
                         <span class="nav-link me-3">Bienvenido, {{ user.username }}</span>
@@ -126,7 +132,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>

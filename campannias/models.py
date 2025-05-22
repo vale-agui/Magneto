@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import time, date
 
 class CampaniaBase(models.Model):
     ESTADOS = [
@@ -40,6 +41,10 @@ class CampaniaFacebook(CampaniaBase):
     idioma = models.CharField(max_length=50)
     dispositivo = models.CharField(max_length=50)
     comportamiento = models.TextField()
+    fecha_inicio = models.DateField()
+    hora_inicio = models.TimeField(default=time(0, 0))
+    fecha_fin = models.DateField()
+    hora_fin = models.TimeField(default=time(23, 59))
 
     def __str__(self):
         return f"Facebook - {self.nombre}"
@@ -62,6 +67,10 @@ class CampaniaInstagram(CampaniaBase):
     hashtags = models.TextField()
     estilo_visual = models.CharField(max_length=50)
     tono_mensaje = models.CharField(max_length=50)
+    fecha_inicio = models.DateField()
+    hora_inicio = models.TimeField(default=time(0, 0))
+    fecha_fin = models.DateField()
+    hora_fin = models.TimeField(default=time(23, 59))
 
     def __str__(self):
         return f"Instagram - {self.nombre}"
@@ -83,6 +92,10 @@ class CampaniaGoogle(CampaniaBase):
     palabras_clave = models.TextField()
     presupuesto_diario = models.DecimalField(max_digits=10, decimal_places=2)
     puja_maxima = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_inicio = models.DateField()
+    hora_inicio = models.TimeField(default=time(0, 0))
+    fecha_fin = models.DateField()
+    hora_fin = models.TimeField(default=time(23, 59))
 
     def __str__(self):
         return f"Google - {self.nombre}"
@@ -160,6 +173,10 @@ class CampanaFacebook(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateField(default=date.today)
+    hora_inicio = models.TimeField(default=time(0, 0))
+    fecha_fin = models.DateField(default=date.today)
+    hora_fin = models.TimeField(default=time(23, 59))
     
     def __str__(self):
         return f"{self.nombre} - {self.get_estado_display()}"
@@ -193,8 +210,10 @@ class CampanaGoogle(models.Model):
     nombre = models.CharField(max_length=255)
     tipo_campana = models.CharField(max_length=20, choices=TIPOS_CAMPANA)
     presupuesto_diario = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
+    fecha_inicio = models.DateField(default=date.today)
+    hora_inicio = models.TimeField(default=time(0, 0))
+    fecha_fin = models.DateField(default=date.today)
+    hora_fin = models.TimeField(default=time(23, 59))
     
     # Configuración de segmentación
     palabras_clave = models.TextField(help_text="Palabras clave separadas por comas")

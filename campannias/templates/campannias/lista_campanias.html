@@ -3,162 +3,163 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
+    <!-- Título principal -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-primary mb-2">Campañas Publicitarias</h1>
-        <p class="text-gray-600">Visualiza tus campañas en diferentes redes sociales</p>
+        <h1 class="text-3xl font-bold text-primary mb-2">Visualización de Campañas</h1>
+        <p class="text-gray-600">Selecciona una plataforma para ver sus campañas publicitarias</p>
     </div>
+
+    <!-- Botones de navegación -->
+    <div class="flex justify-center space-x-4 mb-8">
+        <a href="?red=google"
+            class="px-6 py-3 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition {% if red == 'google' %}ring-2 ring-red-800{% endif %}">
+            <i class="fab fa-google mr-2"></i>Google Ads
+        </a>
+        <a href="?red=facebook"
+            class="px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition {% if red == 'facebook' %}ring-2 ring-blue-800{% endif %}">
+            <i class="fab fa-facebook mr-2"></i>Facebook Ads
+        </a>
+        <a href="?red=instagram"
+            class="px-6 py-3 text-lg font-medium text-white bg-pink-500 rounded-lg hover:bg-pink-600 transition {% if red == 'instagram' %}ring-2 ring-pink-800{% endif %}">
+            <i class="fab fa-instagram mr-2"></i>Instagram Ads
+        </a>
+    </div>
+
+    <!-- Mensajes de alerta -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- Campañas de Google Ads -->
-    <div class="mb-12">
-        <div class="mb-4">
-            <h2 class="text-2xl font-semibold text-primary">Campañas de Google Ads</h2>
-        </div>
-        {% if campanias_google %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-6 py-3 border-b text-left">Nombre</th>
-                        <th class="px-6 py-3 border-b text-left">Tipo</th>
-                        <th class="px-6 py-3 border-b text-left">Presupuesto</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Inicio</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Fin</th>
-                        <th class="px-6 py-3 border-b text-left">Estado</th>
-                        <th class="px-6 py-3 border-b text-left">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for campania in campanias_google %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 border-b">{{ campania.nombre }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.tipo_campana }}</td>
-                        <td class="px-6 py-4 border-b">${{ campania.presupuesto_diario }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">
-                            <span class="px-2 py-1 rounded text-sm
-                                {% if campania.estado == 'ACTIVA' %}bg-green-100 text-green-800
-                                {% elif campania.estado == 'PAUSADA' %}bg-yellow-100 text-yellow-800
-                                {% else %}bg-red-100 text-red-800{% endif %}">
-                                {{ campania.estado }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 border-b">
-                            <a href="{% url 'campannias:editar_campana_google' campania.id %}" class="text-blue-600 hover:text-blue-800 mr-3">Editar</a>
-                            <a href="{% url 'campannias:eliminar_campana_google' campania.id %}" class="text-red-600 hover:text-red-800" onclick="return confirm('¿Estás seguro de eliminar esta campaña?')">Eliminar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-8 bg-gray-50 rounded-lg">
-            <p class="text-gray-600">No hay campañas de Google Ads creadas.</p>
-        </div>
-        {% endif %}
-    </div>
+    {% if red == 'google' %}
+        <h2 class="text-2xl font-semibold mb-4">Campañas de Google Ads</h2>
+        {% for campania in campanias_google %}
+            <div class="bg-white p-4 rounded shadow mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-bold">{{ campania.nombre }}</h3>
+                        <p class="text-gray-600">Presupuesto: ${{ campania.presupuesto_diario }}</p>
+                        <p class="text-gray-600">Fecha de inicio: {{ campania.fecha_inicio|date:"d/m/Y" }}</p>
+                        <p class="text-gray-600">Fecha de fin: {{ campania.fecha_fin|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                            {% if campania.estado == 'ACTIVA' %}
+                                bg-green-100 text-green-800
+                            {% elif campania.estado == 'PAUSADA' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif campania.estado == 'FINALIZADA' %}
+                                bg-gray-100 text-gray-800
+                            {% elif campania.estado == 'BORRADOR' %}
+                                bg-blue-100 text-blue-800
+                            {% else %}
+                                bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ campania.estado }}
+                        </span>
+                        {% if campania.estado == 'ACTIVA' %}
+                        <a href="{% url 'campannias:detener_campania' campania.id 'google' %}" 
+                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
+                            Detener
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-gray-600">No hay campañas de Google Ads registradas.</p>
+        {% endfor %}
 
-    <!-- Campañas de Facebook -->
-    <div class="mb-12">
-        <div class="mb-4">
-            <h2 class="text-2xl font-semibold text-primary">Campañas de Facebook</h2>
-        </div>
-        {% if campanias_facebook %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-6 py-3 border-b text-left">Nombre</th>
-                        <th class="px-6 py-3 border-b text-left">Tipo</th>
-                        <th class="px-6 py-3 border-b text-left">Presupuesto</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Inicio</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Fin</th>
-                        <th class="px-6 py-3 border-b text-left">Estado</th>
-                        <th class="px-6 py-3 border-b text-left">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for campania in campanias_facebook %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 border-b">{{ campania.nombre }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.tipo_campana }}</td>
-                        <td class="px-6 py-4 border-b">${{ campania.presupuesto_diario }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">
-                            <span class="px-2 py-1 rounded text-sm
-                                {% if campania.estado == 'ACTIVA' %}bg-green-100 text-green-800
-                                {% elif campania.estado == 'PAUSADA' %}bg-yellow-100 text-yellow-800
-                                {% else %}bg-red-100 text-red-800{% endif %}">
-                                {{ campania.estado }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 border-b">
-                            <a href="{% url 'campannias:editar_campana_facebook' campania.id %}" class="text-blue-600 hover:text-blue-800 mr-3">Editar</a>
-                            <a href="{% url 'campannias:eliminar_campana_facebook' campania.id %}" class="text-red-600 hover:text-red-800" onclick="return confirm('¿Estás seguro de eliminar esta campaña?')">Eliminar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-8 bg-gray-50 rounded-lg">
-            <p class="text-gray-600">No hay campañas de Facebook creadas.</p>
-        </div>
-        {% endif %}
-    </div>
+    <!-- Campañas de Facebook Ads -->
+    {% elif red == 'facebook' %}
+        <h2 class="text-2xl font-semibold mb-4">Campañas de Facebook Ads</h2>
+        {% for campania in campanias_facebook %}
+            <div class="bg-white p-4 rounded shadow mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-bold">{{ campania.nombre }}</h3>
+                        <p class="text-gray-600">Presupuesto: ${{ campania.monto_presupuesto }}</p>
+                        <p class="text-gray-600">Tipo de presupuesto: {{ campania.tipo_presupuesto }}</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                            {% if campania.estado == 'ACTIVA' %}
+                                bg-green-100 text-green-800
+                            {% elif campania.estado == 'PAUSADA' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif campania.estado == 'FINALIZADA' %}
+                                bg-gray-100 text-gray-800
+                            {% elif campania.estado == 'BORRADOR' %}
+                                bg-blue-100 text-blue-800
+                            {% else %}
+                                bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ campania.estado }}
+                        </span>
+                        {% if campania.estado == 'ACTIVA' %}
+                        <a href="{% url 'campannias:detener_campania' campania.id 'facebook' %}" 
+                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
+                            Detener
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-gray-600">No hay campañas de Facebook Ads registradas.</p>
+        {% endfor %}
 
-    <!-- Campañas de Instagram -->
-    <div class="mb-12">
-        <div class="mb-4">
-            <h2 class="text-2xl font-semibold text-primary">Campañas de Instagram</h2>
-        </div>
-        {% if campanias_instagram %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-6 py-3 border-b text-left">Nombre</th>
-                        <th class="px-6 py-3 border-b text-left">Tipo</th>
-                        <th class="px-6 py-3 border-b text-left">Presupuesto</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Inicio</th>
-                        <th class="px-6 py-3 border-b text-left">Fecha Fin</th>
-                        <th class="px-6 py-3 border-b text-left">Estado</th>
-                        <th class="px-6 py-3 border-b text-left">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for campania in campanias_instagram %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 border-b">{{ campania.nombre }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.tipo_campana }}</td>
-                        <td class="px-6 py-4 border-b">${{ campania.presupuesto_diario }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 border-b">
-                            <span class="px-2 py-1 rounded text-sm
-                                {% if campania.estado == 'ACTIVA' %}bg-green-100 text-green-800
-                                {% elif campania.estado == 'PAUSADA' %}bg-yellow-100 text-yellow-800
-                                {% else %}bg-red-100 text-red-800{% endif %}">
-                                {{ campania.estado }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 border-b">
-                            <a href="{% url 'campannias:editar_campana_instagram' campania.id %}" class="text-blue-600 hover:text-blue-800 mr-3">Editar</a>
-                            <a href="{% url 'campannias:eliminar_campana_instagram' campania.id %}" class="text-red-600 hover:text-red-800" onclick="return confirm('¿Estás seguro de eliminar esta campaña?')">Eliminar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-8 bg-gray-50 rounded-lg">
-            <p class="text-gray-600">No hay campañas de Instagram creadas.</p>
-        </div>
-        {% endif %}
-    </div>
+    <!-- Campañas de Instagram Ads -->
+    {% elif red == 'instagram' %}
+        <h2 class="text-2xl font-semibold mb-4">Campañas de Instagram Ads</h2>
+        {% for campania in campanias_instagram %}
+            <div class="bg-white p-4 rounded shadow mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-bold">{{ campania.nombre }}</h3>
+                        <p class="text-gray-600">Presupuesto: ${{ campania.presupuesto }}</p>
+                        <p class="text-gray-600">Objetivo: {{ campania.objetivo }}</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                            {% if campania.estado == 'ACTIVA' %}
+                                bg-green-100 text-green-800
+                            {% elif campania.estado == 'PAUSADA' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif campania.estado == 'FINALIZADA' %}
+                                bg-gray-100 text-gray-800
+                            {% elif campania.estado == 'BORRADOR' %}
+                                bg-blue-100 text-blue-800
+                            {% else %}
+                                bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ campania.estado }}
+                        </span>
+                        {% if campania.estado == 'ACTIVA' %}
+                        <a href="{% url 'campannias:detener_campania' campania.id 'instagram' %}" 
+                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
+                            Detener
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-gray-600">No hay campañas de Instagram Ads registradas.</p>
+        {% endfor %}
+
+    <!-- Si no hay selección de red -->
+    {% else %}
+        <p class="text-center text-gray-600">Selecciona una red social para visualizar sus campañas.</p>
+    {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}
