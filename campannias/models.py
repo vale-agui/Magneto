@@ -4,21 +4,25 @@ from datetime import time, date
 
 class CampaniaBase(models.Model):
     ESTADOS = [
-        ('borrador', 'Borrador'),
-        ('activa', 'Activa'),
-        ('pausada', 'Pausada'),
-        ('finalizada', 'Finalizada')
+        ('ACTIVA', 'Activa'),
+        ('PAUSADA', 'Pausada'),
+        ('FINALIZADA', 'Finalizada'),
     ]
-
-    nombre = models.CharField(max_length=200)
-    descripcion = models.TextField()
+    nombre = models.CharField(max_length=100)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='ACTIVA')
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     presupuesto = models.DecimalField(max_digits=10, decimal_places=2)
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='borrador')
     creado_por = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+
+    def detener(self):
+        if self.estado == 'ACTIVA':
+            self.estado = 'PAUSADA'
+            self.save()
+            return True
+        return False
 
     class Meta:
         abstract = True
@@ -91,6 +95,12 @@ class CampanaFacebook(models.Model):
         ordering = ['-fecha_creacion']
 
 class CampanaInstagram(models.Model):
+    ESTADOS = [
+        ('ACTIVA', 'Activa'),
+        ('PAUSADA', 'Pausada'),
+        ('FINALIZADA', 'Finalizada'),
+    ]
+    
     # Contenido de Instagram
     image_url = models.URLField(null=True)
     caption = models.TextField(blank=True, null=True)
@@ -101,6 +111,7 @@ class CampanaInstagram(models.Model):
     presupuesto = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     fecha_inicio = models.DateField(null=True)
     fecha_fin = models.DateField(null=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='ACTIVA')
 
     # Configuración de anuncio
     objetivo = models.CharField(max_length=100, null=True)

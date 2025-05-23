@@ -64,11 +64,19 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                        <a href="{% url 'campannias:detener_campania' campania.id 'google' %}" 
-                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
-                            Detener
-                        </a>
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                                    Detener
+                                </button>
+                            </form>
+                        {% elif campania.estado == 'PAUSADA' %}
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                    Activar
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
@@ -104,11 +112,19 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                        <a href="{% url 'campannias:detener_campania' campania.id 'facebook' %}" 
-                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
-                            Detener
-                        </a>
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                                    Detener
+                                </button>
+                            </form>
+                        {% elif campania.estado == 'PAUSADA' %}
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                    Activar
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
@@ -144,11 +160,19 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                        <a href="{% url 'campannias:detener_campania' campania.id 'instagram' %}" 
-                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                           onclick="return confirm('¿Estás seguro de que deseas detener esta campaña?')">
-                            Detener
-                        </a>
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                                    Detener
+                                </button>
+                            </form>
+                        {% elif campania.estado == 'PAUSADA' %}
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                    Activar
+                                </button>
+                            </form>
                         {% endif %}
                     </div>
                 </div>

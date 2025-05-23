@@ -2,39 +2,107 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="text-3xl font-bold text-primary mb-6">Total Gastado en Campañas</h1>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total General -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">Total General</h2>
-            <p class="text-3xl font-bold text-primary">${{ total_general|floatformat:2 }}</p>
-        </div>
-        
+<div class="container mx-auto px-4 py-8">
+    <!-- Título principal -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-primary mb-2">Total Gastado</h1>
+        <p class="text-gray-600">Resumen de gastos por plataforma</p>
+    </div>
+
+    <!-- Tarjetas de totales -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Google Ads -->
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">Google Ads</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Google Ads</h2>
+                <i class="fab fa-google text-red-600 text-2xl"></i>
+            </div>
             <p class="text-3xl font-bold text-primary">${{ total_google|floatformat:2 }}</p>
         </div>
-        
+
         <!-- Facebook Ads -->
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">Facebook Ads</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Facebook Ads</h2>
+                <i class="fab fa-facebook text-blue-600 text-2xl"></i>
+            </div>
             <p class="text-3xl font-bold text-primary">${{ total_facebook|floatformat:2 }}</p>
         </div>
-        
+
         <!-- Instagram Ads -->
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">Instagram Ads</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Instagram Ads</h2>
+                <i class="fab fa-instagram text-pink-500 text-2xl"></i>
+            </div>
             <p class="text-3xl font-bold text-primary">${{ total_instagram|floatformat:2 }}</p>
         </div>
     </div>
-    
-    <div class="mt-8">
-        <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
-            Volver al Inicio
-        </a>
+
+    <!-- Total General -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div class="text-center">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Total General</h2>
+            <p class="text-4xl font-bold text-primary">${{ total_general|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <!-- Gráfica de distribución -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <canvas id="distribucionChart" width="400" height="200"></canvas>
     </div>
 </div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('distribucionChart').getContext('2d');
+    
+    // Datos para la gráfica
+    const data = {
+        labels: ['Google Ads', 'Facebook Ads', 'Instagram Ads'],
+        datasets: [{
+            data: [
+                {{ total_google }},
+                {{ total_facebook }},
+                {{ total_instagram }}
+            ],
+            backgroundColor: [
+                'rgba(234, 67, 53, 0.8)',  // Google Red
+                'rgba(66, 103, 178, 0.8)', // Facebook Blue
+                'rgba(225, 48, 108, 0.8)'  // Instagram Pink
+            ],
+            borderColor: [
+                'rgb(234, 67, 53)',
+                'rgb(66, 103, 178)',
+                'rgb(225, 48, 108)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración de la gráfica
+    const config = {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución de Gastos por Plataforma'
+                }
+            }
+        }
+    };
+
+    // Crear la gráfica
+    new Chart(ctx, config);
+});
+</script>
+{% endblock %}
 {% endblock %} 

@@ -2,67 +2,148 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="text-3xl font-bold text-primary mb-6">Costo por Campaña</h1>
-    
-    <!-- Google Ads -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Google Ads</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for campania in campanias_google %}
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
-                <p class="text-2xl font-bold text-primary">${{ campania.presupuesto|floatformat:2 }}</p>
-                <p class="text-sm text-gray-600 mt-2">Estado: {{ campania.get_estado_display }}</p>
-            </div>
-            {% empty %}
-            <div class="col-span-full">
-                <p class="text-gray-600">No hay campañas de Google Ads.</p>
-            </div>
-            {% endfor %}
-        </div>
+<div class="container mx-auto px-4 py-8">
+    <!-- Título principal -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-primary mb-2">Costo por Campaña</h1>
+        <p class="text-gray-600">Visualiza los costos de tus campañas por red social</p>
     </div>
-    
-    <!-- Facebook Ads -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Facebook Ads</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for campania in campanias_facebook %}
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
-                <p class="text-2xl font-bold text-primary">${{ campania.presupuesto|floatformat:2 }}</p>
-                <p class="text-sm text-gray-600 mt-2">Estado: {{ campania.get_estado_display }}</p>
-            </div>
-            {% empty %}
-            <div class="col-span-full">
-                <p class="text-gray-600">No hay campañas de Facebook Ads.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <!-- Instagram Ads -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Instagram Ads</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for campania in campanias_instagram %}
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ campania.nombre }}</h3>
-                <p class="text-2xl font-bold text-primary">${{ campania.presupuesto|floatformat:2 }}</p>
-                <p class="text-sm text-gray-600 mt-2">Estado: {{ campania.get_estado_display }}</p>
-            </div>
-            {% empty %}
-            <div class="col-span-full">
-                <p class="text-gray-600">No hay campañas de Instagram Ads.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    
-    <div class="mt-8">
-        <a href="{% url 'campannias:index' %}" class="bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition duration-300">
-            Volver al Inicio
+
+    <!-- Botones de navegación -->
+    <div class="flex justify-center space-x-4 mb-8">
+        <a href="?red=google"
+            class="px-6 py-3 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition {% if red == 'google' %}ring-2 ring-red-800{% endif %}">
+            <i class="fab fa-google mr-2"></i>Google Ads
+        </a>
+        <a href="?red=facebook"
+            class="px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition {% if red == 'facebook' %}ring-2 ring-blue-800{% endif %}">
+            <i class="fab fa-facebook mr-2"></i>Facebook Ads
+        </a>
+        <a href="?red=instagram"
+            class="px-6 py-3 text-lg font-medium text-white bg-pink-500 rounded-lg hover:bg-pink-600 transition {% if red == 'instagram' %}ring-2 ring-pink-800{% endif %}">
+            <i class="fab fa-instagram mr-2"></i>Instagram Ads
         </a>
     </div>
+
+    <!-- Gráfica de costos -->
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <canvas id="costosChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Tabla de campañas -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presupuesto</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Fin</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% if red == 'google' or not red %}
+                    {% for campania in campanias_google %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.nombre }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${{ campania.presupuesto_diario }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.estado }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+
+                {% if red == 'facebook' or not red %}
+                    {% for campania in campanias_facebook %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.nombre }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${{ campania.monto_presupuesto }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.estado }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+
+                {% if red == 'instagram' or not red %}
+                    {% for campania in campanias_instagram %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.nombre }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${{ campania.presupuesto }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.estado }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_inicio|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ campania.fecha_fin|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('costosChart').getContext('2d');
+    
+    // Datos para la gráfica
+    const data = {
+        labels: ['Google Ads', 'Facebook Ads', 'Instagram Ads'],
+        datasets: [{
+            label: 'Costo Total por Red Social',
+            data: [
+                {{ total_google }},
+                {{ total_facebook }},
+                {{ total_instagram }}
+            ],
+            backgroundColor: [
+                'rgba(234, 67, 53, 0.8)',  // Google Red
+                'rgba(66, 103, 178, 0.8)', // Facebook Blue
+                'rgba(225, 48, 108, 0.8)'  // Instagram Pink
+            ],
+            borderColor: [
+                'rgb(234, 67, 53)',
+                'rgb(66, 103, 178)',
+                'rgb(225, 48, 108)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración de la gráfica
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Costo Total por Red Social'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    // Crear la gráfica
+    new Chart(ctx, config);
+});
+</script>
+{% endblock %}
 {% endblock %} 

@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Título principal -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-primary mb-2">Dashboard</h1>
+        <p class="text-gray-600">Métricas y estadísticas de tus campañas</p>
+    </div>
+
+    <!-- Métricas principales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Total de Visualizaciones -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Visualizaciones</h2>
+                <i class="fas fa-eye text-blue-500 text-2xl"></i>
+            </div>
+            <p class="text-3xl font-bold text-primary">{{ total_visualizaciones|intcomma }}</p>
+        </div>
+
+        <!-- Total de Clics -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Clics</h2>
+                <i class="fas fa-mouse-pointer text-green-500 text-2xl"></i>
+            </div>
+            <p class="text-3xl font-bold text-primary">{{ total_clics|intcomma }}</p>
+        </div>
+
+        <!-- Total de Conversiones -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Conversiones</h2>
+                <i class="fas fa-chart-line text-purple-500 text-2xl"></i>
+            </div>
+            <p class="text-3xl font-bold text-primary">{{ total_conversiones|intcomma }}</p>
+        </div>
+
+        <!-- Campañas Activas -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Campañas Activas</h2>
+                <i class="fas fa-play-circle text-yellow-500 text-2xl"></i>
+            </div>
+            <p class="text-3xl font-bold text-primary">{{ total_campañas_activas }}</p>
+        </div>
+    </div>
+
+    <!-- Gráficas por plataforma -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Google Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Google Ads</h2>
+                <i class="fab fa-google text-red-600 text-2xl"></i>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600">Visualizaciones</p>
+                    <p class="text-xl font-bold">{{ datos_google.total_visualizaciones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Clics</p>
+                    <p class="text-xl font-bold">{{ datos_google.total_clics|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Conversiones</p>
+                    <p class="text-xl font-bold">{{ datos_google.total_conversiones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Campañas Activas</p>
+                    <p class="text-xl font-bold">{{ datos_google.campañas_activas }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facebook Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Facebook Ads</h2>
+                <i class="fab fa-facebook text-blue-600 text-2xl"></i>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600">Visualizaciones</p>
+                    <p class="text-xl font-bold">{{ datos_facebook.total_visualizaciones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Clics</p>
+                    <p class="text-xl font-bold">{{ datos_facebook.total_clics|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Conversiones</p>
+                    <p class="text-xl font-bold">{{ datos_facebook.total_conversiones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Campañas Activas</p>
+                    <p class="text-xl font-bold">{{ datos_facebook.campañas_activas }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram Ads -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Instagram Ads</h2>
+                <i class="fab fa-instagram text-pink-500 text-2xl"></i>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600">Visualizaciones</p>
+                    <p class="text-xl font-bold">{{ datos_instagram.total_visualizaciones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Clics</p>
+                    <p class="text-xl font-bold">{{ datos_instagram.total_clics|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Conversiones</p>
+                    <p class="text-xl font-bold">{{ datos_instagram.total_conversiones|intcomma }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Campañas Activas</p>
+                    <p class="text-xl font-bold">{{ datos_instagram.campañas_activas }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica de distribución de visualizaciones -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <canvas id="visualizacionesChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('visualizacionesChart').getContext('2d');
+    
+    // Datos para la gráfica
+    const data = {
+        labels: ['Google Ads', 'Facebook Ads', 'Instagram Ads'],
+        datasets: [{
+            label: 'Visualizaciones por Plataforma',
+            data: [
+                {{ datos_google.total_visualizaciones }},
+                {{ datos_facebook.total_visualizaciones }},
+                {{ datos_instagram.total_visualizaciones }}
+            ],
+            backgroundColor: [
+                'rgba(234, 67, 53, 0.8)',  // Google Red
+                'rgba(66, 103, 178, 0.8)', // Facebook Blue
+                'rgba(225, 48, 108, 0.8)'  // Instagram Pink
+            ],
+            borderColor: [
+                'rgb(234, 67, 53)',
+                'rgb(66, 103, 178)',
+                'rgb(225, 48, 108)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    // Configuración de la gráfica
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución de Visualizaciones por Plataforma'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    // Crear la gráfica
+    new Chart(ctx, config);
+});
+</script>
+{% endblock %}
+{% endblock %} 
