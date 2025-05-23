@@ -3,6 +3,7 @@ from . import views
 from .views import actualizar_tokens_view
 from .services.gestion_campannias import seleccionar_redes
 from .services.gestion_campannias import crear_campania_dinamica
+from .services.gestion_campannias import eliminar_campania
 
 app_name = 'campannias'
 
@@ -32,4 +33,5 @@ urlpatterns = [
     path('actualizar-tokens/', actualizar_tokens_view, name='actualizar_tokens'),
     path('campanias/<int:campania_id>/detener/', views.detener_campana, name='detener_campana'),
     path('campanias/<int:campania_id>/activar/', views.activar_campana, name='activar_campana'),
+    path('eliminar-campana/<int:campania_id>/', eliminar_campania, name='eliminar_campana'),
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
 from ..models import CampanaFacebook, CampanaInstagram, CampanaGoogle
@@ -6,6 +6,7 @@ from .ads_google import guardar_campana_google
 from .ads_facebook import guardar_campana_facebook 
 from .ads_instagram import guardar_campana_instagram
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 def seleccionar_redes(request):
     """
@@ -135,3 +136,43 @@ def custom_logout(request):
     list(messages.get_messages(request))
     logout(request)
     return redirect('accounts:login')
+
+def eliminar_campania(request, campania_id):
+    """
+    Elimina una campaña de cualquier red social.
+    Args:
+        request: HttpRequest object
+        campania_id: ID de la campaña a eliminar
+    Returns:
+        HttpResponse: Redirección a la lista de campañas
+    """
+    # Intentar encontrar la campaña en cada modelo
+    campania = None
+    tipo_campana = None
+    
+    for model, tipo in [(CampanaGoogle, 'google'), 
+                       (CampanaFacebook, 'facebook'), 
+                       (CampanaInstagram, 'instagram')]:
+        try:
+            campania = get_object_or_404(model, id=campania_id, usuario=request.user)
+            tipo_campana = tipo
+            break
+        except:
+            continue
+    
+    if not campania:
+        messages.error(request, 'Campaña no encontrada')
+        return redirect('campannias:listar_campanias')
+    
+    try:
+        nombre_campania = campania.nombre
+        campania.delete()
+        messages.success(request, f'Campaña {nombre_campania} eliminada exitosamente')
+    except Exception as e:
+        messages.error(request, f'Error al eliminar la campaña: {str(e)}')
+    
+    return redirect('campannias:listar_campanias')
+
+@login_required
+def eliminar_campana(request, campania_id):
+    return eliminar_campania(request, campania_id)

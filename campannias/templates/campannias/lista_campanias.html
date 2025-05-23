@@ -64,20 +64,27 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                                     Detener
                                 </button>
                             </form>
                         {% elif campania.estado == 'PAUSADA' %}
-                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                     Activar
                                 </button>
                             </form>
                         {% endif %}
+                        <form method="post" action="{% url 'campannias:eliminar_campana' campania.id %}" class="inline" 
+                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta campaña? Esta acción no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                <i class="fas fa-trash-alt mr-2"></i>Eliminar
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -112,20 +119,27 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                                     Detener
                                 </button>
                             </form>
                         {% elif campania.estado == 'PAUSADA' %}
-                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                     Activar
                                 </button>
                             </form>
                         {% endif %}
+                        <form method="post" action="{% url 'campannias:eliminar_campana' campania.id %}" class="inline" 
+                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta campaña? Esta acción no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                <i class="fas fa-trash-alt mr-2"></i>Eliminar
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -160,20 +174,27 @@
                             {{ campania.estado }}
                         </span>
                         {% if campania.estado == 'ACTIVA' %}
-                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:detener_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                                     Detener
                                 </button>
                             </form>
                         {% elif campania.estado == 'PAUSADA' %}
-                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}">
+                            <form method="post" action="{% url 'campannias:activar_campana' campania.id %}" class="inline">
                                 {% csrf_token %}
                                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                     Activar
                                 </button>
                             </form>
                         {% endif %}
+                        <form method="post" action="{% url 'campannias:eliminar_campana' campania.id %}" class="inline" 
+                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta campaña? Esta acción no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                <i class="fas fa-trash-alt mr-2"></i>Eliminar
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
