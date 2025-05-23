@@ -5,122 +5,45 @@ from datetime import datetime, timedelta
 import random
 import json
 from django.http import JsonResponse
+from ..models import CampanaFacebook
 
-# Configuración de credenciales simuladas
+# Configuración de credenciales simuladas según Facebook Marketing API
 MOCK_CREDENTIALS = {
     "access_token": "mock_facebook_access_token",
     "app_id": "mock_facebook_app_id",
     "app_secret": "mock_facebook_app_secret",
-    "token_expiry": (datetime.now() + timedelta(hours=1)).isoformat()
+    "ad_account_id": "act_123456789",
+    "business_id": "123456789",
+    "token_expiry": (datetime.now() + timedelta(hours=1)).isoformat(),
+    "token_type": "Bearer",
+    "graph_version": "v18.0"
 }
 
-# Cuentas simuladas
+# Cuentas simuladas según estructura de Facebook Business Manager
 MOCK_ACCOUNTS = [
     {
         "id": "act_123456789",
         "name": "Cuenta Facebook 1",
+        "account_status": 1,
         "currency": "MXN",
-        "timezone": "America/Mexico_City"
+        "timezone": "America/Colombia",
+        "business_name": "Negocio 1",
+        "business_id": "123456789",
+        "permissions": ["MANAGE", "ADVERTISE"],
+        "capabilities": ["MANAGE_ADS", "MANAGE_CAMPAIGNS"]
     },
     {
         "id": "act_987654321",
         "name": "Cuenta Facebook 2",
+        "account_status": 1,
         "currency": "MXN",
-        "timezone": "America/Mexico_City"
+        "timezone": "America/Colombia",
+        "business_name": "Negocio 2",
+        "business_id": "987654321",
+        "permissions": ["MANAGE", "ADVERTISE"],
+        "capabilities": ["MANAGE_ADS", "MANAGE_CAMPAIGNS"]
     }
 ]
-
-# Campañas simuladas
-MOCK_CAMPAIGNS = [
-    {
-        "id": "camp_111111111",
-        "name": "Campaña Facebook 1",
-        "status": "ACTIVE",
-        "budget": 100.00,
-        "start_date": "2024-01-01",
-        "end_date": "2024-12-31"
-    },
-    {
-        "id": "camp_222222222",
-        "name": "Campaña Facebook 2",
-        "status": "ACTIVE",
-        "budget": 200.00,
-        "start_date": "2024-01-01",
-        "end_date": "2024-12-31"
-    }
-]
-
-class FacebookAdsSimulator:
-    def __init__(self):
-        self.formatos_anuncio = [
-            "Imagen única",
-            "Video",
-            "Carrusel",
-            "Colección",
-            "Historia"
-        ]
-        
-        self.ubicaciones = [
-            "Feed de Facebook",
-            "Instagram Feed",
-            "Historias",
-            "Audience Network"
-        ]
-
-    def simular_creacion_campana(self, datos_campana):
-        """
-        Simula la creación de una campaña en Facebook Ads
-        """
-        return {
-            "id_campana": f"fb-{random.randint(100000, 999999)}",
-            "nombre": datos_campana.get("nombre", "Campaña Facebook"),
-            "estado": "ACTIVA",
-            "presupuesto_diario": datos_campana.get("presupuesto", 0) / 30,
-            "tipo_campana": random.choice(self.formatos_anuncio),
-            "ubicaciones": random.sample(self.ubicaciones, 2),
-            "fecha_creacion": datetime.now().isoformat(),
-            "metricas_simuladas": {
-                "alcance_estimado": random.randint(5000, 20000),
-                "impresiones_estimadas": random.randint(10000, 40000),
-                "clics_estimados": random.randint(100, 1000),
-                "conversiones_estimadas": random.randint(10, 100),
-                "costo_estimado": round(random.uniform(50, 500), 2)
-            }
-        }
-
-    def simular_preview_anuncio(self, datos_anuncio):
-        """
-        Simula cómo se vería el anuncio en Facebook
-        """
-        return {
-            "titulo": datos_anuncio.get("titulo", "Título del Anuncio"),
-            "descripcion": datos_anuncio.get("descripcion", "Descripción del anuncio..."),
-            "url_destino": datos_anuncio.get("url", "https://ejemplo.com"),
-            "formato": random.choice(self.formatos_anuncio),
-            "preview_movil": {
-                "titulo": "Cómo se ve en móvil",
-                "descripcion": "Vista previa en dispositivos móviles"
-            },
-            "preview_escritorio": {
-                "titulo": "Cómo se ve en escritorio",
-                "descripcion": "Vista previa en navegadores de escritorio"
-            }
-        }
-
-    def simular_metricas(self, id_campana):
-        """
-        Simula las métricas de rendimiento de una campaña
-        """
-        return {
-            "alcance": random.randint(1000, 5000),
-            "impresiones": random.randint(2000, 10000),
-            "clics": random.randint(50, 200),
-            "ctr": round(random.uniform(1, 5), 2),
-            "conversiones": random.randint(5, 20),
-            "costo_total": round(random.uniform(100, 500), 2),
-            "cpa": round(random.uniform(5, 25), 2),
-            "roas": round(random.uniform(1, 5), 2)
-        }
 
 def facebook_auth_url():
     """Simula la URL de autenticación de Facebook"""
@@ -134,38 +57,56 @@ def listar_cuentas_facebook_service():
     """Simula la obtención de cuentas de Facebook Ads"""
     return MOCK_ACCOUNTS
 
-def crear_campana_facebook_ads(request):
-    """Simula la creación de una campaña en Facebook Ads"""
+def listar_campanas_facebook(request):
+    """
+    Lista las campañas de Facebook Ads desde la base de datos.
+    """
     try:
-        data = json.loads(request.body)
-        nueva_campana = {
-            "id": f"camp_{len(MOCK_CAMPAIGNS) + 1}",
-            "name": data.get("nombre"),
-            "status": "ACTIVE",
-            "budget": float(data.get("presupuesto_diario", 0)),
-            "start_date": data.get("fecha_inicio"),
-            "end_date": data.get("fecha_fin")
-        }
-        MOCK_CAMPAIGNS.append(nueva_campana)
-        return nueva_campana
+        campanias = CampanaFacebook.objects.filter(usuario=request.user).order_by('-fecha_creacion')
+        resultados = []
+        
+        for campania in campanias:
+            resultados.append({
+                "id": campania.id,
+                "nombre": campania.nombre,
+                "estado": campania.estado,
+                "presupuesto": campania.monto_presupuesto,
+                "fecha_inicio": campania.fecha_inicio,
+                "fecha_fin": campania.fecha_fin,
+                "objetivo": campania.objetivo_optimizacion,
+                "audiencia": {
+                    "edad_min": campania.edad_min,
+                    "edad_max": campania.edad_max,
+                    "genero": campania.genero,
+                    "ubicaciones": campania.ubicaciones,
+                    "intereses": campania.intereses
+                }
+            })
+        
+        return resultados
     except Exception as e:
         return {"error": str(e)}
 
-def preview_anuncio_facebook(campania):
-    """Simula la vista previa de un anuncio de Facebook"""
-    return {
-        "titulo": f"Vista previa de {campania.nombre}",
-        "descripcion": "Esta es una vista previa simulada de Facebook",
-        "url_destino": "https://ejemplo.com",
-        "imagen": "https://via.placeholder.com/300x200"
-    }
+def guardar_campana_facebook(request, datos):
+    campana = CampanaFacebook(
+        nombre=datos.get('nombre'),
+        campaign_id=datos.get('campaign_id'),
+        tipo_presupuesto=datos.get('tipo_presupuesto'),
+        monto_presupuesto=float(datos.get('monto_presupuesto', 0)),
+        evento_cobro=datos.get('evento_cobro'),
+        objetivos=datos.get('objetivos'),
+        edad_min=datos.get('edad_min'),
+        edad_max=datos.get('edad_max'),
+        genero=datos.get('genero'),
+        ubicaciones=datos.get('ubicaciones'),
+        intereses=datos.get('intereses'),
+        estado=datos.get('estado', 'PAUSADA'),
+        fecha_inicio=datos.get('fecha_inicio'),
+        fecha_fin=datos.get('fecha_fin'),
+        usuario=request.user
+    )
+    campana.save()
+    return campana
 
-def obtener_metricas_facebook(campania):
-    """Simula la obtención de métricas de una campaña de Facebook"""
-    return {
-        "alcance": random.randint(1000, 10000),
-        "impresiones": random.randint(2000, 20000),
-        "clics": random.randint(100, 1000),
-        "costo": round(random.uniform(100, 1000), 2),
-        "conversiones": random.randint(10, 100)
-    }
+# def validar_requisitos_facebook(datos):
+#     return {'valido': True, 'datos_validados': datos}

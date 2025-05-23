@@ -23,87 +23,120 @@ class CampaniaBase(models.Model):
     class Meta:
         abstract = True
 
-class CampaniaFacebook(CampaniaBase):
-    # Campos específicos de Facebook
-    tipo_anuncio = models.CharField(max_length=50, choices=[
-        ('imagen', 'Imagen'),
-        ('video', 'Video'),
-        ('carousel', 'Carousel'),
-        ('coleccion', 'Colección')
-    ])
-    formato_anuncio = models.CharField(max_length=50)
-    ubicacion_anuncio = models.CharField(max_length=50)
-    segmentacion_edad_min = models.IntegerField()
-    segmentacion_edad_max = models.IntegerField()
-    segmentacion_genero = models.CharField(max_length=20)
-    segmentacion_ubicacion = models.CharField(max_length=200)
-    segmentacion_intereses = models.TextField()
-    idioma = models.CharField(max_length=50)
-    dispositivo = models.CharField(max_length=50)
-    comportamiento = models.TextField()
-    fecha_inicio = models.DateField()
-    hora_inicio = models.TimeField(default=time(0, 0))
-    fecha_fin = models.DateField()
-    hora_fin = models.TimeField(default=time(23, 59))
+class CampanaFacebook(models.Model):
+    ESTADOS = [
+        ('ACTIVA', 'Activa'),
+        ('PAUSADA', 'Pausada'),
+    ]
+    
+    TIPOS_PRESUPUESTO = [
+        ('PRESUPUESTO_DIARIO', 'Presupuesto Diario'),
+        ('PRESUPUESTO_TOTAL', 'Presupuesto Total'),
+    ]
+    
+    EVENTOS_COBRO = [
+        ('IMPRESIONES', 'Impresiones'),
+        ('CLICS', 'Clics'),
+        ('CLICS_EN_ENLACES', 'Clics en Enlaces'),
+        ('VISTAS_DE_VIDEO', 'Vistas de Video'),
+    ]
+    
+    OBJETIVOS = [
+        ('CLICS_EN_ENLACES', 'Clics en Enlaces'),
+        ('ALCANCE', 'Alcance'),
+        ('IMPRESIONES', 'Impresiones'),
+        ('VISTAS_DE_VIDEO', 'Vistas de Video'),
+        ('INTERACCION_CON_PUBLICACIONES', 'Interacción con Publicaciones'),
+    ]
+    
+    GENEROS = [
+        ('TODOS', 'Todos'),
+        ('MASCULINO', 'Masculino'),
+        ('FEMENINO', 'Femenino'),
+    ]
 
+    # Campos básicos
+    nombre = models.CharField(max_length=255, null=True)
+    campaign_id = models.CharField(max_length=255, null=True)
+    
+    # Configuración de presupuesto
+    tipo_presupuesto = models.CharField(max_length=20, choices=TIPOS_PRESUPUESTO, null=True)
+    monto_presupuesto = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    evento_cobro = models.CharField(max_length=20, choices=EVENTOS_COBRO, null=True)
+    objetivos = models.CharField(max_length=50, choices=OBJETIVOS, null=True)
+    
+    # Segmentación
+    edad_min = models.IntegerField(null=True)
+    edad_max = models.IntegerField(null=True)
+    genero = models.CharField(max_length=10, choices=GENEROS, null=True)
+    ubicaciones = models.TextField(null=True)
+    intereses = models.TextField(blank=True, null=True)
+    
+    # Estado
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='PAUSED', null=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateField(default=date.today, null=True)
+    fecha_fin = models.DateField(default=date.today, null=True)
+    
     def __str__(self):
-        return f"Facebook - {self.nombre}"
+        return f"{self.nombre} - {self.get_estado_display()}"
+    
+    class Meta:
+        verbose_name = "Campaña Facebook"
+        verbose_name_plural = "Campañas Facebook"
+        ordering = ['-fecha_creacion']
 
-class CampaniaInstagram(CampaniaBase):
-    # Campos específicos de Instagram
+class CampanaInstagram(models.Model):
+    # Contenido de Instagram
+    image_url = models.URLField(null=True)
+    caption = models.TextField(blank=True, null=True)
+    access_token = models.CharField(max_length=255, null=True)
+
+    # Configuración de campaña
+    nombre = models.CharField(max_length=255, null=True)
+    presupuesto = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    fecha_inicio = models.DateField(null=True)
+    fecha_fin = models.DateField(null=True)
+
+    # Configuración de anuncio
+    objetivo = models.CharField(max_length=100, null=True)
     tipo_contenido = models.CharField(max_length=50, choices=[
         ('historia', 'Historia'),
         ('post', 'Post'),
         ('reels', 'Reels'),
         ('carousel', 'Carousel')
-    ])
-    formato_anuncio = models.CharField(max_length=50)
-    ubicacion_anuncio = models.CharField(max_length=50)
-    segmentacion_edad_min = models.IntegerField()
-    segmentacion_edad_max = models.IntegerField()
-    segmentacion_genero = models.CharField(max_length=20)
-    segmentacion_ubicacion = models.CharField(max_length=200)
-    segmentacion_intereses = models.TextField()
-    hashtags = models.TextField()
-    estilo_visual = models.CharField(max_length=50)
-    tono_mensaje = models.CharField(max_length=50)
-    fecha_inicio = models.DateField()
-    hora_inicio = models.TimeField(default=time(0, 0))
-    fecha_fin = models.DateField()
-    hora_fin = models.TimeField(default=time(23, 59))
+    ], null=True)
+    formato_anuncio = models.CharField(max_length=50, null=True)
+    ubicacion_anuncio = models.CharField(max_length=50, null=True)
+
+    # Segmentación
+    edad_min = models.IntegerField(null=True)
+    edad_max = models.IntegerField(null=True)
+    genero = models.CharField(max_length=20, choices=[
+        ('todos', 'Todos'),
+        ('masculino', 'Masculino'),
+        ('femenino', 'Femenino')
+    ], null=True)
+    ubicacion = models.CharField(max_length=200, null=True)
+    intereses = models.TextField(null=True)
+    hashtags = models.TextField(blank=True, null=True)
+
+    # Metadatos
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Instagram - {self.nombre}"
 
-class CampaniaGoogle(CampaniaBase):
-    # Campos específicos de Google Ads
-    tipo_campana = models.CharField(max_length=50, choices=[
-        ('busqueda', 'Búsqueda'),
-        ('display', 'Display'),
-        ('video', 'Video'),
-        ('shopping', 'Shopping')
-    ])
-    red_anuncios = models.CharField(max_length=50)
-    segmentacion_edad_min = models.IntegerField()
-    segmentacion_edad_max = models.IntegerField()
-    segmentacion_genero = models.CharField(max_length=20)
-    segmentacion_ubicacion = models.CharField(max_length=200)
-    segmentacion_intereses = models.TextField()
-    palabras_clave = models.TextField()
-    presupuesto_diario = models.DecimalField(max_digits=10, decimal_places=2)
-    puja_maxima = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_inicio = models.DateField()
-    hora_inicio = models.TimeField(default=time(0, 0))
-    fecha_fin = models.DateField()
-    hora_fin = models.TimeField(default=time(23, 59))
-
-    def __str__(self):
-        return f"Google - {self.nombre}"
-
 class ResultadoCampania(models.Model):
-    campania_facebook = models.ForeignKey(CampaniaFacebook, on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_facebook')
-    campania_instagram = models.ForeignKey(CampaniaInstagram, on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_instagram')
-    campania_google = models.ForeignKey(CampaniaGoogle, on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_google')
+    campania_facebook = models.ForeignKey(CampanaFacebook, on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_facebook')
+    campania_instagram = models.ForeignKey(CampanaInstagram, on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_instagram')
+    campania_google = models.ForeignKey('CampanaGoogle', on_delete=models.CASCADE, null=True, blank=True, related_name='resultados_google')
     fecha = models.DateField()
     impresiones = models.IntegerField(default=0)
     clics = models.IntegerField(default=0)
@@ -117,127 +150,44 @@ class ResultadoCampania(models.Model):
         campania = self.campania_facebook or self.campania_instagram or self.campania_google
         return f"Resultados de {campania} - {self.fecha}"
 
-class CampanaFacebook(models.Model):
-    ESTADOS = [
-        ('ACTIVE', 'Activa'),
-        ('PAUSED', 'Pausada'),
-    ]
-    
-    TIPOS_PRESUPUESTO = [
-        ('daily_budget', 'Presupuesto Diario'),
-        ('lifetime_budget', 'Presupuesto Total'),
-    ]
-    
-    EVENTOS_COBRO = [
-        ('IMPRESSIONS', 'Impresiones'),
-        ('CLICKS', 'Clics'),
-        ('LINK_CLICKS', 'Clics en Enlaces'),
-        ('VIDEO_VIEWS', 'Vistas de Video'),
-    ]
-    
-    OBJETIVOS = [
-        ('LINK_CLICKS', 'Clics en Enlaces'),
-        ('REACH', 'Alcance'),
-        ('IMPRESSIONS', 'Impresiones'),
-        ('VIDEO_VIEWS', 'Vistas de Video'),
-        ('POST_ENGAGEMENT', 'Interacción con Publicaciones'),
-    ]
-    
-    GENEROS = [
-        ('ALL', 'Todos'),
-        ('MALE', 'Masculino'),
-        ('FEMALE', 'Femenino'),
-    ]
-
-    # Campos básicos
-    nombre = models.CharField(max_length=255)
-    campaign_id = models.CharField(max_length=255)
-    
-    # Configuración de presupuesto
-    tipo_presupuesto = models.CharField(max_length=20, choices=TIPOS_PRESUPUESTO)
-    monto_presupuesto = models.DecimalField(max_digits=10, decimal_places=2)
-    evento_cobro = models.CharField(max_length=20, choices=EVENTOS_COBRO)
-    objetivo_optimizacion = models.CharField(max_length=20, choices=OBJETIVOS)
-    
-    # Segmentación
-    edad_min = models.IntegerField()
-    edad_max = models.IntegerField()
-    genero = models.CharField(max_length=10, choices=GENEROS)
-    ubicaciones = models.TextField()  # Almacenará ubicaciones separadas por comas
-    intereses = models.TextField(blank=True)  # Almacenará intereses separados por comas
-    
-    # Estado
-    estado = models.CharField(max_length=10, choices=ESTADOS, default='PAUSED')
-    
-    # Metadatos
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    fecha_inicio = models.DateField(default=date.today)
-    hora_inicio = models.TimeField(default=time(0, 0))
-    fecha_fin = models.DateField(default=date.today)
-    hora_fin = models.TimeField(default=time(23, 59))
-    
-    def __str__(self):
-        return f"{self.nombre} - {self.get_estado_display()}"
-    
-    class Meta:
-        verbose_name = "Campaña Facebook"
-        verbose_name_plural = "Campañas Facebook"
-        ordering = ['-fecha_creacion']
-
 class CampanaGoogle(models.Model):
     ESTADOS = [
-        ('ACTIVE', 'Activa'),
-        ('PAUSED', 'Pausada'),
+        ('ACTIVA', 'Activa'),
+        ('PAUSADA', 'Pausada'),
     ]
-    
-    TIPOS_CAMPANA = [
+    # Configuración de campaña
+    nombre = models.CharField(max_length=255, null=True)
+    tipo_campana = models.CharField(max_length=20, choices=[
         ('SEARCH', 'Búsqueda'),
         ('DISPLAY', 'Display'),
         ('VIDEO', 'Video'),
         ('SHOPPING', 'Shopping'),
-    ]
-    
-    # Campos de autenticación y configuración
-    customer_id = models.CharField(max_length=255, help_text="ID de cliente de Google Ads")
-    developer_token = models.CharField(max_length=255, help_text="Developer Token de Google Ads")
-    refresh_token = models.CharField(max_length=255, help_text="Refresh Token de OAuth 2.0")
-    access_token = models.CharField(max_length=255, help_text="Access Token de OAuth 2.0")
-    mcc_account = models.BooleanField(default=False, help_text="Indica si es una cuenta MCC")
-    
-    # Campos básicos de la campaña
-    nombre = models.CharField(max_length=255)
-    tipo_campana = models.CharField(max_length=20, choices=TIPOS_CAMPANA)
-    presupuesto_diario = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_inicio = models.DateField(default=date.today)
-    hora_inicio = models.TimeField(default=time(0, 0))
-    fecha_fin = models.DateField(default=date.today)
-    hora_fin = models.TimeField(default=time(23, 59))
-    
-    # Configuración de segmentación
-    palabras_clave = models.TextField(help_text="Palabras clave separadas por comas")
-    ubicaciones = models.TextField(help_text="Ubicaciones objetivo separadas por comas")
-    idiomas = models.TextField(help_text="Idiomas objetivo separados por comas")
-    
-    # Configuración de pujas
-    puja_maxima = models.DecimalField(max_digits=10, decimal_places=2)
+    ], null=True)
+    presupuesto_diario = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    fecha_inicio = models.DateField(null=True)
+    fecha_fin = models.DateField(null=True)
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='PAUSADA', null=True)
+
+    # Configuración de anuncios
+    palabras_clave = models.TextField(help_text="Palabras clave separadas por comas", null=True)
+    ubicaciones = models.TextField(help_text="Ubicaciones objetivo separadas por comas", null=True)
+    idiomas = models.TextField(help_text="Idiomas objetivo separados por comas", null=True)
+    puja_maxima = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     estrategia_puja = models.CharField(max_length=50, choices=[
         ('MANUAL_CPC', 'CPC Manual'),
         ('MAXIMIZE_CONVERSIONS', 'Maximizar Conversiones'),
         ('TARGET_CPA', 'CPA Objetivo'),
         ('TARGET_ROAS', 'ROAS Objetivo'),
-    ])
-    
-    # Estado y metadatos
-    estado = models.CharField(max_length=10, choices=ESTADOS, default='PAUSED')
+    ], null=True)
+
+    # Metadatos
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     def __str__(self):
-        return f"{self.nombre} - {self.get_estado_display()}"
-    
+        return f"{self.nombre} - {self.tipo_campana}"
+
     class Meta:
         verbose_name = "Campaña Google"
         verbose_name_plural = "Campañas Google"

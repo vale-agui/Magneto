@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-
+{% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 {% block content %}
 <div class="container mt-4">
     <div class="mb-6 text-center">
@@ -27,54 +33,9 @@
     {% endif %}
     <div class="card">
         <div class="card-body">
-            <form method="post" action="{% url 'campannias:crear_campana_google' %}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
+            <form method="post" action="{{ request.path }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
                 {% csrf_token %}
                 
-                <!-- Sección de Autenticación y Configuración -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Cuenta Google Ads</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Customer ID</label>
-                            <input type="text" name="customer_id" required
-                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                                   placeholder="Ingresa tu Customer ID">
-                            <p class="text-sm text-gray-500 mt-1">ID de cliente de Google Ads</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Developer Token</label>
-                            <input type="text" name="developer_token" required
-                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                                   placeholder="Ingresa tu Developer Token">
-                            <p class="text-sm text-gray-500 mt-1">Token de desarrollador aprobado por Google</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Refresh Token</label>
-                            <input type="text" name="refresh_token" required
-                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                                   placeholder="Ingresa tu Refresh Token">
-                            <p class="text-sm text-gray-500 mt-1">Token de actualización de OAuth 2.0</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">Access Token</label>
-                            <input type="text" name="access_token" required
-                                   class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                                   placeholder="Ingresa tu Access Token">
-                            <p class="text-sm text-gray-500 mt-1">Token de acceso de OAuth 2.0</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="flex items-center space-x-2">
-                                <input type="checkbox" name="mcc_account" class="form-checkbox h-5 w-5 text-primary">
-                                <span class="text-gray-700">Esta es una cuenta MCC (Manager Account)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Sección de Configuración de Campaña -->
                 <div class="mb-8">
                     <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Campaña</h3>
@@ -110,6 +71,14 @@
                             <label class="block text-gray-700 font-medium mb-2">Fecha de Fin</label>
                             <input type="date" name="fecha_fin" required
                                    class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Estado de la Campaña</label>
+                            <select name="estado" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="ACTIVA">Activa</option>
+                                <option value="PAUSADA">Pausada</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">La campaña se creará en este estado</p>
                         </div>
                     </div>
                 </div>

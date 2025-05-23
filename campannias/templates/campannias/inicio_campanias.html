@@ -1,70 +1,29 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crear Campaña - ÉLAN AUTOMATE</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#1D4ED8', /* Azul */
-            secondary: '#059669', /* Verde */
-          }
-        }
-      }
-    }
-  </script>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-r from-blue-200 to-green-200 font-sans">
-  <!-- Encabezado: Barra superior con el logo -->
-  <header class="bg-white shadow p-4 flex items-center justify-between">
-    <a href="{% url 'home' %}" class="text-2xl font-bold">
-      <span class="text-primary">ÉLAN</span> <span class="text-secondary">AUTOMATE</span>
-    </a>
-    <nav class="space-x-4">
-      {% if user.is_authenticated %}
-        <a href="{% url 'accounts:logout' %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary">Cerrar Sesión</a>
-      {% else %}
-        <a href="{% url 'accounts:login' %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary">Iniciar Sesión</a>
-        <a href="{% url 'accounts:register' %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary">Registrarse</a>
-      {% endif %}
-    </nav>
-  </header>
+{% extends 'base.html' %}
 
-  <!-- Contenido principal: Selección de redes sociales -->
-  <main class="flex-1 container mx-auto px-4 py-8">
-    <div class="max-w-xl mx-auto bg-white rounded shadow p-8">
-      <h2 class="text-2xl font-bold mb-6 text-center">Selecciona las redes sociales para tu campaña</h2>
-      <form method="post" action="{% url 'campannias:seleccionar_redes' %}">
+{% block title %}Crear Campaña - ÉLAN AUTOMATE{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white rounded shadow p-8">
+    <h2 class="text-2xl font-bold mb-6 text-center">Selecciona las redes sociales para tu campaña</h2>
+    <form method="post" action="{% url 'campannias:seleccionar_redes' %}">
         {% csrf_token %}
         <div class="flex flex-col gap-4 mb-6">
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="redes" value="facebook" class="form-checkbox text-primary">
-            <span class="ml-2">Facebook Ads</span>
-          </label>
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="redes" value="instagram" class="form-checkbox text-primary">
-            <span class="ml-2">Instagram Ads</span>
-          </label>
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="redes" value="google" class="form-checkbox text-primary">
-            <span class="ml-2">Google Ads</span>
-          </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="redes" value="facebook" class="form-checkbox text-primary">
+                <span class="ml-2">Facebook Ads</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="redes" value="instagram" class="form-checkbox text-primary">
+                <span class="ml-2">Instagram Ads</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="redes" value="google" class="form-checkbox text-primary">
+                <span class="ml-2">Google Ads</span>
+            </label>
         </div>
         <div class="flex justify-end">
-          <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-secondary transition">Continuar</button>
+            <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:bg-secondary transition">Continuar</button>
         </div>
-      </form>
-    </div>
-  </main>
-
-  <!-- Pie de página -->
-  <footer class="bg-white p-4 text-center text-gray-500">
-    © {{ now|date:"Y" }} ÉLAN AUTOMATE. Todos los derechos reservados.
-  </footer>
-</body>
-</html>
+    </form>
+</div>
+{% endblock %}

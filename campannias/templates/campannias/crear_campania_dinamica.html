@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
@@ -5,13 +6,28 @@
         <div class="alert alert-success text-center text-2xl font-bold text-green-700 bg-green-100 p-8 rounded">
             {{ mensaje|default:'¡Campañas creadas exitosamente!' }}
         </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'campannias:listar_campanias' %}" class="btn btn-primary">
+                Ver mis campañas
+            </a>
+        </div>
     {% elif error %}
         <div class="alert alert-danger text-center text-xl text-red-700 bg-red-100 p-8 rounded">
             {{ error }}
         </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'campannias:index' %}" class="btn btn-secondary">
+                Volver al inicio
+            </a>
+        </div>
     {% else %}
         <div class="alert alert-info text-center text-xl text-blue-700 bg-blue-100 p-8 rounded">
-            Aquí irá el formulario dinámico según las redes seleccionadas.
+            Progreso: {{ paso|add:"1" }} de {{ total }} redes sociales
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ activar_desactivar_url }}" class="btn btn-warning">
+                Reiniciar proceso
+            </a>
         </div>
     {% endif %}
 </div>

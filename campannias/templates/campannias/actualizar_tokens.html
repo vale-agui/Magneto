@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Tokens - ÉLAN AUTOMATE{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">Actualizar Tokens de Autenticación</h2>
+            <p class="text-center mb-4">Simula la autenticación y actualización de tokens para cada plataforma de anuncios.</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-grid gap-3 mb-3">
+                    <button name="plataforma" value="google" class="btn btn-danger">Actualizar Token Google Ads</button>
+                    <button name="plataforma" value="facebook" class="btn btn-primary">Actualizar Token Facebook Ads</button>
+                    <button name="plataforma" value="instagram" class="btn btn-info text-white">Actualizar Token Instagram Ads</button>
+                </div>
+            </form>
+            {% if resultado %}
+                <div class="alert alert-success mt-3 text-center">
+                    <strong>Resultado:</strong> {{ resultado }}
+                </div>
+            {% endif %}
+            <div class="d-grid mt-4">
+                <a href="{% url 'home' %}" class="btn btn-secondary">Volver a la página principal</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -72,17 +72,13 @@
           <h3 class="text-xl font-semibold text-primary mb-4">Configuración Básica</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-gray-700 font-medium mb-2">Nombre del Ad Set</label>
-              <input type="text" name="name" required
-                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="Ingresa el nombre del conjunto de anuncios">
+              <label class="block text-gray-700 font-medium mb-2">Nombre de la Campaña</label>
+              <input type="text" name="nombre" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ingresa el nombre de la campaña">
             </div>
             
             <div>
               <label class="block text-gray-700 font-medium mb-2">ID de la Campaña</label>
-              <input type="text" name="campaign_id" required
-                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="Ingresa el ID de la campaña">
+              <input type="text" name="campaign_id" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ingresa el ID de la campaña">
             </div>
           </div>
         </div>
@@ -93,41 +89,37 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-gray-700 font-medium mb-2">Tipo de Presupuesto</label>
-              <select name="budget_type" required
-                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="daily_budget">Presupuesto Diario</option>
-                <option value="lifetime_budget">Presupuesto Total</option>
+              <select name="tipo_presupuesto" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="PRESUPUESTO_DIARIO">Presupuesto Diario</option>
+                <option value="PRESUPUESTO_TOTAL">Presupuesto Total</option>
               </select>
             </div>
             
             <div>
-              <label class="block text-gray-700 font-medium mb-2">Monto del Presupuesto (centavos)</label>
-              <input type="number" name="budget_amount" required min="0"
+              <label class="block text-gray-700 font-medium mb-2">Monto del Presupuesto</label>
+              <input type="number" name="monto_presupuesto" required min="0" step="0.01"
                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="Ej: 1000 para $10.00">
-              <p class="text-sm text-gray-500 mt-1">Ingresa el monto en centavos (ej: 1000 = $10.00)</p>
+                     placeholder="Ej: 10.00">
             </div>
 
             <div>
               <label class="block text-gray-700 font-medium mb-2">Evento de Cobro</label>
-              <select name="billing_event" required
-                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="IMPRESSIONS">Impresiones</option>
-                <option value="CLICKS">Clics</option>
-                <option value="LINK_CLICKS">Clics en Enlaces</option>
-                <option value="VIDEO_VIEWS">Vistas de Video</option>
+              <select name="evento_cobro" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="IMPRESIONES">Impresiones</option>
+                <option value="CLICS">Clics</option>
+                <option value="CLICS_EN_ENLACES">Clics en Enlaces</option>
+                <option value="VISTAS_DE_VIDEO">Vistas de Video</option>
               </select>
             </div>
 
             <div>
               <label class="block text-gray-700 font-medium mb-2">Objetivo de Optimización</label>
-              <select name="optimization_goal" required
-                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="LINK_CLICKS">Clics en Enlaces</option>
-                <option value="REACH">Alcance</option>
-                <option value="IMPRESSIONS">Impresiones</option>
-                <option value="VIDEO_VIEWS">Vistas de Video</option>
-                <option value="POST_ENGAGEMENT">Interacción con Publicaciones</option>
+              <select name="objetivos" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="CLICS_EN_ENLACES">Clics en Enlaces</option>
+                <option value="ALCANCE">Alcance</option>
+                <option value="IMPRESIONES">Impresiones</option>
+                <option value="VISTAS_DE_VIDEO">Vistas de Video</option>
+                <option value="INTERACCION_CON_PUBLICACIONES">Interacción con Publicaciones</option>
               </select>
             </div>
           </div>
@@ -140,10 +132,10 @@
             <div>
               <label class="block text-gray-700 font-medium mb-2">Rango de Edad</label>
               <div class="flex gap-4">
-                <input type="number" name="age_min" required min="13" max="65"
+                <input type="number" name="edad_min" required min="13" max="65"
                        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                        placeholder="Edad mínima">
-                <input type="number" name="age_max" required min="13" max="65"
+                <input type="number" name="edad_max" required min="13" max="65"
                        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                        placeholder="Edad máxima">
               </div>
@@ -151,26 +143,46 @@
 
             <div>
               <label class="block text-gray-700 font-medium mb-2">Género</label>
-              <select name="gender" required
+              <select name="genero" required
                       class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="ALL">Todos</option>
-                <option value="MALE">Masculino</option>
-                <option value="FEMALE">Femenino</option>
+                <option value="TODOS">Todos</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMENINO">Femenino</option>
               </select>
             </div>
 
             <div>
               <label class="block text-gray-700 font-medium mb-2">Ubicaciones</label>
-              <input type="text" name="locations" required
+              <textarea name="ubicaciones" required
                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="Países, ciudades o regiones (separados por comas)">
+                     placeholder="Países, ciudades o regiones (separados por comas)"
+                     rows="3"></textarea>
             </div>
 
             <div>
               <label class="block text-gray-700 font-medium mb-2">Intereses</label>
-              <input type="text" name="interests"
+              <textarea name="intereses"
                      class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="Intereses (separados por comas)">
+                     placeholder="Intereses (separados por comas)"
+                     rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Fechas -->
+        <div class="mb-8">
+          <h3 class="text-xl font-semibold text-primary mb-4">Fechas de la Campaña</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Fecha de Inicio</label>
+              <input type="date" name="fecha_inicio" required
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+            </div>
+            
+            <div>
+              <label class="block text-gray-700 font-medium mb-2">Fecha de Fin</label>
+              <input type="date" name="fecha_fin" required
+                     class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
           </div>
         </div>
@@ -181,10 +193,10 @@
           <div class="grid grid-cols-1 gap-6">
             <div>
               <label class="block text-gray-700 font-medium mb-2">Estado Inicial</label>
-              <select name="status" required
+              <select name="estado" required
                       class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="ACTIVE">Activa</option>
-                <option value="PAUSED">Pausada</option>
+                <option value="ACTIVA">Activa</option>
+                <option value="PAUSADA">Pausada</option>
               </select>
               <p class="text-sm text-gray-500 mt-1">La campaña se creará en este estado</p>
             </div>

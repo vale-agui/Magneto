@@ -64,7 +64,7 @@
         <h2 class="text-3xl font-bold text-primary">Configurando campaña para <span class="text-secondary">Instagram Ads</span></h2>
         <p class="text-gray-600 mt-2">Completa los campos requeridos para tu campaña en Instagram.</p>
       </div>
-      <form method="post" action="{{ request.path }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
+      <form method="post" action="?paso={{ paso }}" class="bg-white p-8 rounded-lg shadow-lg mt-6">
         {% csrf_token %}
         
         <!-- Sección de Contenido de Instagram -->
@@ -103,24 +103,20 @@
           <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Campaña</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.nombre.label }}</label>
-              {{ form.nombre|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.nombre.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Nombre de la Campaña</label>
+              <input type="text" name="nombre" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nombre de la campaña">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.presupuesto.label }}</label>
-              {{ form.presupuesto|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.presupuesto.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Presupuesto</label>
+              <input type="number" name="presupuesto" required min="0" step="0.01" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ej: 100.00">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_inicio.label }}</label>
-              {{ form.fecha_inicio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.fecha_inicio.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Fecha de Inicio</label>
+              <input type="date" name="fecha_inicio" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.fecha_fin.label }}</label>
-              {{ form.fecha_fin|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.fecha_fin.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Fecha de Fin</label>
+              <input type="date" name="fecha_fin" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
           </div>
         </div>
@@ -130,24 +126,25 @@
           <h3 class="text-xl font-semibold text-primary mb-4">Configuración de Anuncio</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.objetivo.label }}</label>
-              {{ form.objetivo|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.objetivo.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Objetivo</label>
+              <input type="text" name="objetivo" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ej: Alcance, Interacción, Clics, etc.">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.tipo_contenido.label }}</label>
-              {{ form.tipo_contenido|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.tipo_contenido.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Tipo de Contenido</label>
+              <select name="tipo_contenido" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="historia">Historia</option>
+                <option value="post">Post</option>
+                <option value="reels">Reels</option>
+                <option value="carousel">Carousel</option>
+              </select>
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.formato_anuncio.label }}</label>
-              {{ form.formato_anuncio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.formato_anuncio.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Formato de Anuncio</label>
+              <input type="text" name="formato_anuncio" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ej: Imagen, Video, etc.">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion_anuncio.label }}</label>
-              {{ form.ubicacion_anuncio|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.ubicacion_anuncio.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Ubicación del Anuncio</label>
+              <input type="text" name="ubicacion_anuncio" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ej: Feed, Stories, Explorar, etc.">
             </div>
           </div>
         </div>
@@ -157,51 +154,32 @@
           <h3 class="text-xl font-semibold text-primary mb-4">Segmentación</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.edad_min.label }}</label>
-              {{ form.edad_min|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.edad_min.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Edad Mínima</label>
+              <input type="number" name="edad_min" required min="13" max="65" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Edad mínima">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.edad_max.label }}</label>
-              {{ form.edad_max|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.edad_max.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Edad Máxima</label>
+              <input type="number" name="edad_max" required min="13" max="65" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Edad máxima">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.genero.label }}</label>
-              {{ form.genero|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.genero.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Género</label>
+              <select name="genero" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="todos">Todos</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.ubicacion.label }}</label>
-              {{ form.ubicacion|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.ubicacion.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Ubicación</label>
+              <input type="text" name="ubicacion" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="País, ciudad o región">
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.intereses.label }}</label>
-              {{ form.intereses|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.intereses.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Intereses</label>
+              <textarea name="intereses" required class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Intereses (separados por comas)" rows="3"></textarea>
             </div>
             <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.hashtags.label }}</label>
-              {{ form.hashtags|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.hashtags.errors }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Sección de Estilo -->
-        <div class="mb-8">
-          <h3 class="text-xl font-semibold text-primary mb-4">Estilo y Tono</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.estilo_visual.label }}</label>
-              {{ form.estilo_visual|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.estilo_visual.errors }}
-            </div>
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">{{ form.tono_mensaje.label }}</label>
-              {{ form.tono_mensaje|add_class:'w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary' }}
-              {{ form.tono_mensaje.errors }}
+              <label class="block text-gray-700 font-medium mb-2">Hashtags</label>
+              <textarea name="hashtags" class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="#ejemplo, #publicidad" rows="3"></textarea>
             </div>
           </div>
         </div>
