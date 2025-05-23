@@ -71,6 +71,7 @@ def guardar_campana_instagram(request, datos):
         ubicacion=datos.get('ubicacion'),
         intereses=datos.get('intereses'),
         hashtags=datos.get('hashtags', ''),
+        url_redireccion=datos.get('url_redireccion'),
         usuario=request.user
     )
     campana.save()

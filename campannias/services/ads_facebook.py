@@ -103,6 +103,7 @@ def guardar_campana_facebook(request, datos):
         estado=datos.get('estado', 'PAUSADA'),
         fecha_inicio=datos.get('fecha_inicio'),
         fecha_fin=datos.get('fecha_fin'),
+        url_redireccion=datos.get('url_redireccion'),
         usuario=request.user
     )
     campana.save()

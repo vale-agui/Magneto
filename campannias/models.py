@@ -86,6 +86,8 @@ class CampanaFacebook(models.Model):
     fecha_inicio = models.DateField(default=date.today, null=True)
     fecha_fin = models.DateField(default=date.today, null=True)
     
+    url_redireccion = models.URLField(null=True, blank=True)
+    
     def __str__(self):
         return f"{self.nombre} - {self.get_estado_display()}"
     
@@ -140,6 +142,8 @@ class CampanaInstagram(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    url_redireccion = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return f"Instagram - {self.nombre}"
